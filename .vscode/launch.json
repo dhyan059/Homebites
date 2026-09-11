@@ -1,0 +1,49 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": ".NET Core Launch (Backend API)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/Backend/bin/Debug/net8.0/Homebites.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/Backend",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+        "uriFormat": "%s/swagger"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://localhost:5000"
+      },
+      "sourceFileMap": {
+        "/Views": "${workspaceFolder}/Backend/Views"
+      }
+    },
+    {
+      "name": "Launch Frontend (Chrome)",
+      "type": "chrome",
+      "request": "launch",
+      "file": "${workspaceFolder}/Frontend/index.html"
+    },
+    {
+      "name": "Launch Frontend (Edge)",
+      "type": "msedge",
+      "request": "launch",
+      "file": "${workspaceFolder}/Frontend/index.html"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Full Stack (Backend + Frontend)",
+      "configurations": [
+        ".NET Core Launch (Backend API)",
+        "Launch Frontend (Edge)"
+      ],
+      "stopAll": true
+    }
+  ]
+}

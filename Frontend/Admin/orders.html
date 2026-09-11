@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Orders Management - HomeBites Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--orange:#FF6B35;--yellow:#FFC300;--red:#E63946;--green:#06D6A0;--dark:#0d0d1a;--card:#1a1a2e;--border:rgba(255,107,53,.18);--white:#fff}
+    body{font-family:"Poppins",sans-serif;background:var(--dark);color:var(--white);display:flex;min-height:100vh}
+    a{text-decoration:none;color:inherit}
+    .sidebar{width:220px;flex-shrink:0;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100}
+    .sb-brand{padding:22px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px}
+    .sb-brand .ico{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--orange),var(--yellow));display:flex;align-items:center;justify-content:center;font-size:18px}
+    .sb-brand span em{font-style:normal;color:var(--orange)}
+    .sb-nav{flex:1;overflow-y:auto;padding:14px 12px}
+    .sb-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;font-size:13.5px;font-weight:500;color:rgba(255,255,255,.75);transition:all .2s;border:1px solid transparent;margin-bottom:4px}
+    .sb-item:hover,.sb-item.active{background:rgba(255,107,53,.14);border-color:rgba(255,107,53,.3);color:var(--orange)}
+    .sb-item i{width:18px;color:var(--orange);font-size:15px}
+    .sb-section{font-size:10px;font-weight:700;color:rgba(255,255,255,.3);letter-spacing:1px;text-transform:uppercase;padding:14px 14px 6px}
+    .sb-footer{padding:14px 12px;border-top:1px solid var(--border)}
+    .sb-logout{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;background:rgba(230,57,70,.1);border:1px solid rgba(230,57,70,.25);color:#ff6b6b;font-size:13px;font-weight:600;cursor:pointer}
+    .sb-logout:hover{background:rgba(230,57,70,.2)}
+    .main{margin-left:220px;flex:1;display:flex;flex-direction:column}
+    .topbar{background:rgba(26,26,46,.97);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+    .topbar h2{font-size:18px;font-weight:700}
+    .admin-badge{display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,.7)}
+    .admin-badge .dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
+    .content{padding:28px;flex:1}
+    .filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:20px}
+    .filter-btn{padding:7px 18px;border-radius:50px;border:1.5px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.75);cursor:pointer;font-size:12.5px;font-weight:600;font-family:inherit;transition:all .2s}
+    .filter-btn.active,.filter-btn:hover{background:var(--orange);border-color:var(--orange);color:#fff}
+    .search-wrap{position:relative;margin-left:auto}
+    .search-wrap i{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,.35);font-size:13px}
+    .search-box{padding:8px 14px 8px 36px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.12);border-radius:10px;color:#fff;font-family:inherit;font-size:13px;outline:none;width:220px}
+    .search-box:focus{border-color:var(--orange)}
+    .table-card{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden}
+    table{width:100%;border-collapse:collapse}
+    th{font-size:11px;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.5px;padding:11px 16px;text-align:left;border-bottom:1px solid rgba(255,255,255,.06)}
+    td{padding:12px 16px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle}
+    tr:last-child td{border-bottom:none}
+    tr:hover td{background:rgba(255,255,255,.02)}
+    .badge-pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+    .pill-green{background:rgba(6,214,160,.15);color:#06D6A0}
+    .pill-orange{background:rgba(255,107,53,.15);color:var(--orange)}
+    .pill-red{background:rgba(230,57,70,.15);color:#ff6b6b}
+    .pill-yellow{background:rgba(255,195,0,.15);color:#FFC300}
+    .pill-blue{background:rgba(59,130,246,.15);color:#93c5fd}
+    .pill-gray{background:rgba(255,255,255,.08);color:rgba(255,255,255,.45)}
+    .btn-sm{padding:5px 12px;border-radius:7px;border:none;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .18s;margin:2px}
+    .btn-primary{background:var(--orange);color:#fff}
+    .btn-success{background:rgba(6,214,160,.2);color:#06D6A0;border:1px solid rgba(6,214,160,.35)}
+    .btn-danger{background:rgba(230,57,70,.2);color:#ff6b6b;border:1px solid rgba(230,57,70,.35)}
+    .btn-warn{background:rgba(255,195,0,.2);color:#FFC300;border:1px solid rgba(255,195,0,.35)}
+    .btn-info{background:rgba(59,130,246,.2);color:#93c5fd;border:1px solid rgba(59,130,246,.35)}
+    .btn-sm:hover{filter:brightness(1.2)}
+    .status-btns{display:flex;flex-wrap:wrap;gap:4px}
+    /* REFUND MODAL */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:9999;padding:20px}
+    .modal-overlay.open{display:flex}
+    .modal-card{background:#16213E;border:1px solid var(--orange);border-radius:20px;padding:30px;width:min(440px,100%);color:#fff}
+    .modal-card h3{margin-bottom:14px;font-size:18px}
+    textarea{width:100%;height:90px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.15);border-radius:10px;color:#fff;padding:10px;font-family:inherit;font-size:13px;resize:none;outline:none;margin-bottom:14px}
+    textarea:focus{border-color:var(--orange)}
+    .modal-btns{display:flex;gap:10px}
+    .modal-btn{flex:1;padding:12px;border-radius:10px;border:none;font-weight:700;cursor:pointer;font-family:inherit;font-size:14px}
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:rgba(30,30,50,.97);border:1px solid rgba(255,107,53,.4);color:#fff;padding:11px 24px;border-radius:50px;font-size:13.5px;font-weight:600;z-index:99999;transition:transform .35s;white-space:nowrap}
+    .toast.show{transform:translateX(-50%) translateY(0)}
+  </style>
+</head>
+<body>
+<nav class="sidebar">
+  <div class="sb-brand"><div class="ico">&#9881;</div><span>Home<em>Bites</em></span></div>
+  <div class="sb-nav">
+    <div class="sb-section">Main</div>
+    <a href="dashboard.html" class="sb-item"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+    <a href="orders.html"    class="sb-item active"><i class="fa-solid fa-receipt"></i> Orders</a>
+    <a href="users.html"     class="sb-item"><i class="fa-solid fa-users"></i> Customers</a>
+    <div class="sb-section">Catalogue</div>
+    <a href="menu.html"    class="sb-item"><i class="fa-solid fa-utensils"></i> Menu Items</a>
+    <a href="coupons.html" class="sb-item"><i class="fa-solid fa-tags"></i> Coupons</a>
+  </div>
+  <div class="sb-footer">
+    <div class="sb-logout" onclick="adminLogout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</div>
+  </div>
+</nav>
+<div class="main">
+  <div class="topbar">
+    <h2>&#128203; Orders Management</h2>
+    <div class="admin-badge"><div class="dot"></div><span id="adminName">Admin</span></div>
+  </div>
+  <div class="content">
+    <div class="filters">
+      <button class="filter-btn active" onclick="filterStatus('all',this)">All</button>
+      <button class="filter-btn" onclick="filterStatus('Accepted',this)">Accepted</button>
+      <button class="filter-btn" onclick="filterStatus('Preparing',this)">Preparing</button>
+      <button class="filter-btn" onclick="filterStatus('Ready',this)">Ready</button>
+      <button class="filter-btn" onclick="filterStatus('PickedUp',this)">Picked Up</button>
+      <button class="filter-btn" onclick="filterStatus('Delivered',this)">Delivered</button>
+      <button class="filter-btn" onclick="filterStatus('Refund Requested',this)" style="color:var(--yellow);">⚠️ Refund Requests</button>
+      <button class="filter-btn" onclick="filterStatus('Refunded',this)">Refunded</button>
+      <div class="search-wrap">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" class="search-box" id="searchBox" placeholder="Search orders..." oninput="applySearch(this.value)">
+      </div>
+    </div>
+    <div class="table-card">
+      <table>
+        <thead><tr>
+          <th>Order #</th><th>Customer</th><th>Items</th><th>Amount</th>
+          <th>Payment</th><th>Status</th><th>Date</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="ordersTbl"><tr><td colspan="8" style="text-align:center;padding:40px;color:rgba(255,255,255,.4)">Loading orders...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- REFUND MODAL -->
+<div class="modal-overlay" id="refundModal">
+  <div class="modal-card">
+    <h3>✅ Approve Customer Refund</h3>
+    <p id="refundCustomerReasonText" style="font-size:13px;color:var(--yellow);margin-bottom:12px;background:rgba(255,195,0,0.1);padding:10px;border-radius:8px;"></p>
+    <p style="font-size:12.5px;color:rgba(255,255,255,.6);margin-bottom:10px;">Approval note / refund remarks:</p>
+    <input type="hidden" id="refundOrderId">
+    <textarea id="refundReason" placeholder="e.g. Refund approved as requested by customer. Amount credited."></textarea>
+    <div class="modal-btns">
+      <button class="modal-btn" onclick="confirmRefund()" style="background:var(--orange);color:#fff">Confirm & Refund</button>
+      <button class="modal-btn" onclick="closeRefundModal()" style="background:rgba(255,255,255,.08);color:#fff">Cancel</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="../Scripts/page-runtime.js"></script>
+<script src="../Scripts/orders.js"></script>
+<script>
+  const ADMIN_API='http://localhost:5000/api/admin';
+  const admin=JSON.parse(sessionStorage.getItem('hb_admin')||'null');
+  if(!admin) window.location.href='login.html';
+  else{const el=document.getElementById('adminName');if(el)el.textContent=admin.name||'Admin';}
+  function adminLogout(){sessionStorage.removeItem('hb_admin');window.location.href='../index.html';}
+
+  let allOrders=[],currentFilter='all',currentSearch='';
+
+  function showToast(msg){
+    const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),2800);
+  }
+
+  function statusPill(s){
+    var m={Accepted:'pill-orange',Preparing:'pill-yellow',Ready:'pill-blue',PickedUp:'pill-blue',Delivered:'pill-green',Cancelled:'pill-red','Refund Requested':'pill-yellow',Refunded:'pill-gray'};
+    return '<span class="badge-pill '+(m[s]||'pill-gray')+'">'+s+'</span>';
+  }
+
+  function getStatusBtns(o){
+    const id=o.id, s=o.orderStatus;
+    var btns='';
+
+    // 1. Regular Order Status Workflow
+    if(s==='Accepted')   btns+='<button class="btn-sm btn-warn" onclick="updateStatus('+id+',\'Preparing\')">Mark Preparing</button>';
+    if(s==='Preparing')  {
+      btns+='<button class="btn-sm btn-info" onclick="updateStatus('+id+',\'Ready\')">Mark Ready</button>';
+      btns+='<button class="btn-sm btn-success" onclick="updateStatus('+id+',\'Delivered\')">Mark Delivered</button>';
+    }
+    if(s==='Ready') {
+      btns+='<button class="btn-sm btn-info" onclick="updateStatus('+id+',\'PickedUp\')">Mark Picked Up</button>';
+      btns+='<button class="btn-sm btn-success" onclick="updateStatus('+id+',\'Delivered\')">Mark Delivered</button>';
+    }
+    if(s==='PickedUp') {
+      btns+='<button class="btn-sm btn-success" onclick="updateStatus('+id+',\'Delivered\')">Mark Delivered</button>';
+    }
+    if(s==='Delivered') {
+      btns+='<span style="color:var(--green);font-weight:700;font-size:12px;"><i class="fa-solid fa-circle-check"></i> Delivered</span>';
+    }
+
+    // 2. Refund ONLY when customer raises it
+    if(s==='Refund Requested'){
+      btns='<button class="btn-sm btn-danger" onclick="openRefundModal('+id+')"><i class="fa-solid fa-check"></i> Approve Refund</button>' +
+           '<button class="btn-sm btn-warn" onclick="rejectRefund('+id+')"><i class="fa-solid fa-xmark"></i> Decline</button>';
+    }
+    if(s==='Refunded'){
+      btns='<span style="color:#aaa;font-size:12px;font-weight:600;">Refunded</span>';
+    }
+
+    return '<div class="status-btns">'+btns+'</div>';
+  }
+
+  function render(orders){
+    const tbody=document.getElementById('ordersTbl');
+    if(!orders||!orders.length){
+      tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:40px;color:rgba(255,255,255,.4)">No orders found.</td></tr>';
+      return;
+    }
+    tbody.innerHTML=orders.map(o=>{
+      const items=(o.items||[]).map(i=>i.quantity+'x '+i.mealName).join('<br>');
+      const dt=new Date(o.orderDate).toLocaleString('en-IN',{day:'2-digit',month:'short',year:'2-digit',hour:'2-digit',minute:'2-digit'});
+      const isRefundReq = o.orderStatus === 'Refund Requested';
+      const reasonBox = o.cancellationReason ? `<div style="font-size:11px;color:${isRefundReq ? 'var(--yellow)' : '#ff6b6b'};margin-top:4px;background:rgba(255,255,255,0.05);padding:3px 6px;border-radius:4px;"><strong>${isRefundReq ? 'Request Reason:' : 'Note:'}</strong> ${o.cancellationReason}</div>` : '';
+
+      return `<tr>
+        <td><strong style="color:var(--orange)">${o.orderNumber}</strong></td>
+        <td>${o.userName||'—'}<br><small style="color:rgba(255,255,255,.35);font-size:11px">${o.userMobile||''}</small></td>
+        <td style="font-size:12px;max-width:160px">${items}</td>
+        <td><strong>&#8377;${o.totalAmount}</strong><br><small style="color:rgba(255,255,255,.4)">${o.paymentMethod}</small></td>
+        <td><span class="badge-pill ${o.paymentStatus==='Paid'?'pill-green':o.paymentStatus==='Refunded'?'pill-gray':'pill-orange'}">${o.paymentStatus}</span></td>
+        <td>${statusPill(o.orderStatus)}${reasonBox}</td>
+        <td style="font-size:11.5px;color:rgba(255,255,255,.5)">${dt}</td>
+        <td>${getStatusBtns(o)}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  function applyFilters(){
+    let res=allOrders;
+    if(currentFilter!=='all') res=res.filter(o=>o.orderStatus===currentFilter);
+    if(currentSearch) res=res.filter(o=>(o.orderNumber+o.userName+o.userEmail).toLowerCase().includes(currentSearch));
+    render(res);
+  }
+
+  function filterStatus(s,btn){
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter=s;
+    applyFilters();
+  }
+
+  function applySearch(v){currentSearch=v.toLowerCase();applyFilters();}
+
+  async function loadOrders(){
+    try{
+      const r=await fetch(ADMIN_API+'/orders');
+      const d=await r.json();
+      if(d.success){allOrders=d.data;applyFilters();}
+    }catch(e){document.getElementById('ordersTbl').innerHTML='<tr><td colspan="8" style="text-align:center;padding:40px;color:#ff6b6b">Cannot connect to server.</td></tr>';}
+  }
+
+  async function updateStatus(id,status){
+    try{
+      const r=await fetch(ADMIN_API+'/orders/'+id+'/status',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({status})});
+      const d=await r.json();
+      if(d.success){showToast('&#10003; '+d.message);loadOrders();}
+      else showToast('Error: '+d.message);
+    }catch(e){showToast('Server error.');}
+  }
+
+  function openRefundModal(id){
+    const o = allOrders.find(x => x.id === id);
+    document.getElementById('refundOrderId').value = id;
+    document.getElementById('refundCustomerReasonText').textContent = o ? `Customer's Request: "${o.cancellationReason || 'Customer requested refund'}"` : '';
+    document.getElementById('refundReason').value = 'Refund approved by kitchen admin. Amount processed.';
+    document.getElementById('refundModal').classList.add('open');
+  }
+  function closeRefundModal(){document.getElementById('refundModal').classList.remove('open');}
+
+  async function confirmRefund(){
+    const id=document.getElementById('refundOrderId').value;
+    const reason=document.getElementById('refundReason').value.trim();
+    if(!reason){alert('Please enter a refund reason.');return;}
+    try{
+      const r=await fetch(ADMIN_API+'/orders/'+id+'/refund',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reason})});
+      const d=await r.json();
+      if(d.success){closeRefundModal();showToast('&#10003; '+d.message);loadOrders();}
+      else showToast('Error: '+d.message);
+    }catch(e){showToast('Server error.');}
+  }
+
+  async function rejectRefund(id){
+    if(!confirm('Decline this customer refund request?')) return;
+    try{
+      const r=await fetch(ADMIN_API+'/orders/'+id+'/reject-refund',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ reason: 'Refund request declined by admin after review' })
+      });
+      const d=await r.json();
+      if(d.success){showToast('Refund request declined.');loadOrders();}
+      else showToast('Error: '+d.message);
+    }catch(e){showToast('Server error.');}
+  }
+
+  loadOrders();
+  setInterval(loadOrders,30000); // auto-refresh every 30s
+</script>
+</body>
+</html>

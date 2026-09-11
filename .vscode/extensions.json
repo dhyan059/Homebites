@@ -1,0 +1,8 @@
+﻿{
+  "recommendations": [
+    "ms-dotnettools.csharp",
+    "ms-dotnettools.csdevkit",
+    "ritwickdey.liveserver",
+    "ms-vscode.js-debug"
+  ]
+}

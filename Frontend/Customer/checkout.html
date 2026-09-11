@@ -1,0 +1,512 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Payment & Checkout – HomeBites Hyderabad</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --orange: #FF6B35; --orange2: #FF8C42; --yellow: #FFC300;
+      --red: #E63946; --green: #06D6A0; --dark: #1A1A2E; --dark2: #16213E;
+      --white: #FFFFFF;
+    }
+    body { font-family: 'Poppins', sans-serif; background: var(--dark); color: var(--white); padding-bottom: 60px; }
+    a { text-decoration: none; color: inherit; }
+    .header {
+      background: rgba(26,26,46,0.95); backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(255,107,53,0.2);
+      padding: 16px 5%; display: flex; align-items: center; justify-content: space-between;
+    }
+    .container { max-width: 800px; margin: 30px auto; padding: 0 16px; }
+    .card {
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,107,53,0.25);
+      border-radius: 20px; padding: 26px; margin-bottom: 24px;
+    }
+    .payment-option {
+      display: flex; align-items: center; gap: 14px; padding: 14px 18px;
+      background: rgba(255,255,255,0.04); border: 1.5px solid rgba(255,255,255,0.1);
+      border-radius: 14px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s;
+    }
+    .payment-option:hover, .payment-option.active {
+      border-color: var(--orange); background: rgba(255,107,53,0.1);
+    }
+    .payment-option input { accent-color: var(--orange); width: 18px; height: 18px; }
+    
+    .pay-details-panel {
+      background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,107,53,0.3);
+      border-radius: 14px; padding: 18px; margin-top: 10px; margin-bottom: 18px;
+    }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 12.5px; font-weight: 600; margin-bottom: 6px; color: rgba(255,255,255,0.85); }
+    .input-box { position: relative; }
+    .input-box input, .input-box select {
+      width: 100%; padding: 11px 14px; background: rgba(255,255,255,0.07);
+      border: 1.5px solid rgba(255,255,255,0.12); border-radius: 10px;
+      color: #fff; font-family: inherit; font-size: 13.5px; outline: none;
+    }
+    .input-box input:focus { border-color: var(--orange); }
+    .form-hint { font-size: 11px; color: var(--yellow); margin-top: 4px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+    /* Coupon Box */
+    .coupon-section {
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px; padding: 14px; margin-bottom: 18px;
+      display: flex; gap: 10px; align-items: center;
+    }
+    .coupon-section input {
+      flex: 1; padding: 10px 14px; background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; color: #fff;
+      font-family: inherit; font-size: 13px; text-transform: uppercase; outline: none;
+    }
+    .btn-coupon {
+      padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer;
+      background: var(--orange); color: #fff; font-weight: 700; font-size: 13px; font-family: inherit;
+    }
+
+    .btn-place-order {
+      width: 100%; padding: 16px; border-radius: 14px; border: none; cursor: pointer;
+      background: linear-gradient(135deg, var(--orange), var(--yellow));
+      color: var(--dark); font-size: 16px; font-weight: 800; letter-spacing: 0.5px;
+      box-shadow: 0 8px 25px rgba(255,107,53,0.45); transition: transform 0.2s;
+      margin-top: 10px;
+    }
+    .btn-place-order:hover { transform: translateY(-2px); }
+
+    /* Modals */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center;
+      z-index: 9999; padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-card {
+      width: min(440px, 100%); background: #16213E; border: 1px solid var(--orange);
+      border-radius: 20px; padding: 30px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <a href="../index.html" style="font-weight:800;font-size:20px;">🍽️ Home<em style="color:var(--orange);font-style:normal;">Bites</em></a>
+    <a href="address.html" style="color:var(--orange);font-size:13.5px;font-weight:600;">← Change Address</a>
+  </header>
+
+  <div class="container">
+    <h2 style="font-size:22px;margin-bottom:20px;">💳 Select Payment Method</h2>
+
+    <div class="card">
+      <h3 style="font-size:16px;margin-bottom:14px;">Order Bill Summary</h3>
+      <div id="orderSummaryDetails" style="font-size:14px;color:rgba(255,255,255,0.7);margin-bottom:16px;"></div>
+
+      <!-- COUPON CODE SECTION -->
+      <div class="coupon-section">
+        <input type="text" id="couponInput" placeholder="Enter coupon code (e.g. WELCOME50, HOMEBITES)" />
+        <button class="btn-coupon" onclick="applyCoupon()">Apply</button>
+      </div>
+      <div id="couponMessage" style="font-size:12px;margin-top:-10px;margin-bottom:14px;display:none;"></div>
+
+      <!-- 1. UPI OPTION -->
+      <div class="payment-option active" onclick="setPaymentMethod('UPI', this)">
+        <input type="radio" name="payment" checked />
+        <div>
+          <strong>UPI (Google Pay / PhonePe / Paytm / BHIM)</strong><br/>
+          <span style="font-size:12px;color:rgba(255,255,255,0.6);">Direct bank transfer via approved handle</span>
+        </div>
+      </div>
+
+      <div id="upiPanel" class="pay-details-panel">
+        <div class="grid-2">
+          <div class="form-group">
+            <label>10-Digit Mobile / User ID</label>
+            <div class="input-box">
+              <input type="text" id="upiUserPart" placeholder="e.g. 9876543210" maxlength="15" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>UPI Bank Handle</label>
+            <div class="input-box">
+              <select id="upiHandle" style="background:#1A1A2E;">
+                <option value="@okhdfcbank">@okhdfcbank</option>
+                <option value="@okaxis">@okaxis</option>
+                <option value="@oksbi">@oksbi</option>
+                <option value="@okicici">@okicici</option>
+                <option value="@ybl">@ybl</option>
+                <option value="@ibl">@ibl</option>
+                <option value="@axl">@axl</option>
+                <option value="@paytm">@paytm</option>
+                <option value="@upi">@upi</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. CARD OPTION -->
+      <div class="payment-option" onclick="setPaymentMethod('Card', this)">
+        <input type="radio" name="payment" />
+        <div>
+          <strong>Debit / Credit Card</strong><br/>
+          <span style="font-size:12px;color:rgba(255,255,255,0.6);">Visa, MasterCard, RuPay</span>
+        </div>
+      </div>
+
+      <div id="cardPanel" class="pay-details-panel" style="display:none;">
+        <div class="form-group">
+          <label>Card Number (12 Digits Mandatory)</label>
+          <div class="input-box">
+            <input type="text" id="cardNumber" placeholder="1234 5678 9012" maxlength="12" />
+          </div>
+          <div class="form-hint">⚠️ Must be exactly 12 numeric digits</div>
+        </div>
+
+        <div class="grid-3">
+          <div class="form-group">
+            <label>Expiry Month</label>
+            <div class="input-box">
+              <select id="cardExpMonth" style="background:#1A1A2E;">
+                <option value="01">01 - Jan</option>
+                <option value="02">02 - Feb</option>
+                <option value="03">03 - Mar</option>
+                <option value="04">04 - Apr</option>
+                <option value="05">05 - May</option>
+                <option value="06">06 - Jun</option>
+                <option value="07">07 - Jul</option>
+                <option value="08">08 - Aug</option>
+                <option value="09" selected>09 - Sep</option>
+                <option value="10">10 - Oct</option>
+                <option value="11">11 - Nov</option>
+                <option value="12">12 - Dec</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Expiry Year</label>
+            <div class="input-box">
+              <select id="cardExpYear" style="background:#1A1A2E;">
+                <option value="2026" selected>2026</option>
+                <option value="2027">2027</option>
+                <option value="2028">2028</option>
+                <option value="2029">2029</option>
+                <option value="2030">2030</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>CVV (3 Digits)</label>
+            <div class="input-box">
+              <input type="password" id="cardCvv" placeholder="e.g. 789" maxlength="3" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. COD OPTION -->
+      <div class="payment-option" onclick="setPaymentMethod('CashOnDelivery', this)">
+        <input type="radio" name="payment" />
+        <div>
+          <strong>Cash on Delivery (COD)</strong><br/>
+          <span style="font-size:12px;color:rgba(255,255,255,0.6);">Pay cash or scan rider QR code at doorstep</span>
+        </div>
+      </div>
+
+      <div style="margin-top:20px;">
+        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">Delivery Notes for Kitchen (Optional)</label>
+        <textarea id="customerNotes" style="width:100%;height:65px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:#fff;padding:10px;font-family:inherit;font-size:13px;" placeholder="e.g. Ring bell twice, deliver at flat 402."></textarea>
+      </div>
+
+      <button class="btn-place-order" id="btnPlaceOrder" onclick="validateAndInitiatePayment()">
+        Place Order Now →
+      </button>
+    </div>
+  </div>
+
+  <!-- PAYMENT PROCESSING POPUP MODAL -->
+  <div class="modal-overlay" id="paymentProcessingModal">
+    <div class="modal-card">
+      <div style="font-size:48px;margin-bottom:12px;">📲</div>
+      <h3 style="font-size:18px;margin-bottom:6px;">Payment Request Sent!</h3>
+      <p id="processingMsg" style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:14px;line-height:1.5;">
+        Payment link has been sent to your UPI registered mobile number.
+      </p>
+      <div style="font-size:12px;color:var(--green);font-weight:600;">
+        <i class="fa-solid fa-spinner fa-spin"></i> Preparing authorization gateway...
+      </div>
+    </div>
+  </div>
+
+  <!-- AUTHORIZE UPI / BANK PIN MODAL -->
+  <div class="modal-overlay" id="paymentOtpModal">
+    <div class="modal-card">
+      <div style="font-size:40px;margin-bottom:10px;">🔐</div>
+      <h3 style="font-size:18px;margin-bottom:6px;">Authorize Payment</h3>
+      <p id="paymentOtpSubtitle" style="font-size:12.5px;color:rgba(255,255,255,0.65);margin-bottom:18px;">
+        Enter your 6-digit security PIN to authorize this transaction:
+      </p>
+
+      <div style="margin-bottom:20px;">
+        <input type="password" id="payOtpInput" maxlength="6" placeholder="••••••" style="width:100%;padding:14px;text-align:center;font-size:24px;font-weight:800;letter-spacing:8px;background:rgba(255,255,255,0.08);border:1.5px solid var(--orange);border-radius:12px;color:#fff;outline:none;" autocomplete="off" />
+      </div>
+
+      <div style="display:flex;gap:10px;">
+        <button onclick="confirmAndPlaceOrderFinal()" style="flex:1;padding:13px;border-radius:10px;border:none;background:var(--orange);color:#fff;font-weight:700;font-size:14px;cursor:pointer;">
+          Authorize Payment
+        </button>
+        <button onclick="closePaymentOtpModal()" style="padding:13px 18px;border-radius:10px;border:1px solid rgba(255,255,255,0.2);background:transparent;color:#fff;cursor:pointer;">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../Scripts/page-runtime.js"></script>
+  <script src="../Scripts/auth.js"></script>
+  <script src="../Scripts/checkout.js"></script>
+  <script src="../Scripts/payment.js"></script>
+  <script>
+    let currentPaymentMethod = 'UPI';
+    const user = Homebites.getUser();
+    const cart = Homebites.getCart();
+    const addressId = localStorage.getItem('homebites_selected_address_id');
+    let discountAmount = 0;
+    let appliedCoupon = null;
+
+    if (!user) {
+      window.location.href = 'login.html';
+    } else if (!cart || cart.length === 0) {
+      window.location.href = 'menu.html';
+    } else if (!addressId) {
+      window.location.href = 'address.html';
+    }
+
+    const subtotal = cart.reduce((sum, i) => sum + (i.discountPrice * i.quantity), 0);
+    const delivery = subtotal >= 300 ? 0 : 40;
+    const tax = Math.round(subtotal * 0.05);
+    let total = subtotal + delivery + tax;
+
+    function renderSummary() {
+      total = Math.max(0, subtotal - discountAmount) + delivery + tax;
+      document.getElementById('orderSummaryDetails').innerHTML = `
+        <strong>${cart.length} item(s)</strong> &nbsp;|&nbsp; 
+        Subtotal: ₹${subtotal} ${discountAmount > 0 ? `<strong style="color:var(--green)">(-₹${discountAmount} Coupon)</strong>` : ''} + Delivery: ₹${delivery} + Tax: ₹${tax} = 
+        <strong style="color:var(--orange);font-size:17px;">₹${total}</strong>
+      `;
+    }
+    renderSummary();
+
+    // COUPON APPLICATION
+    function applyCoupon() {
+      const code = document.getElementById('couponInput').value.trim().toUpperCase();
+      const msg = document.getElementById('couponMessage');
+      if (!code) {
+        msg.style.display = 'block';
+        msg.style.color = '#ff6b6b';
+        msg.textContent = 'Please enter a coupon code.';
+        return;
+      }
+
+      let coupons = [];
+      try {
+        coupons = JSON.parse(localStorage.getItem('homebites_coupons')) || [];
+      } catch(e) {}
+      if (!coupons.length) {
+        coupons = [
+          { code: 'WELCOME50', discountPct: 50, minOrder: 150, maxDiscount: 100, active: true },
+          { code: 'HOMEBITES', discountPct: 20, minOrder: 250, maxDiscount: 75, active: true },
+          { code: 'FEAST100', discountPct: 30, minOrder: 400, maxDiscount: 150, active: true }
+        ];
+      }
+
+      const match = coupons.find(c => c.code === code && c.active);
+      if (!match) {
+        msg.style.display = 'block';
+        msg.style.color = '#ff6b6b';
+        msg.textContent = 'Invalid or expired coupon code.';
+        return;
+      }
+
+      if (subtotal < match.minOrder) {
+        msg.style.display = 'block';
+        msg.style.color = '#ff6b6b';
+        msg.textContent = `Minimum order amount for ${code} is ₹${match.minOrder}.`;
+        return;
+      }
+
+      const calcDiscount = Math.round((subtotal * match.discountPct) / 100);
+      discountAmount = Math.min(calcDiscount, match.maxDiscount);
+      appliedCoupon = match.code;
+
+      msg.style.display = 'block';
+      msg.style.color = '#06D6A0';
+      msg.textContent = `🎉 Coupon ${match.code} applied! Saved ₹${discountAmount}.`;
+      renderSummary();
+    }
+
+    function setPaymentMethod(method, el) {
+      currentPaymentMethod = method;
+      document.querySelectorAll('.payment-option').forEach(o => {
+        o.classList.remove('active');
+        o.querySelector('input').checked = false;
+      });
+      el.classList.add('active');
+      el.querySelector('input').checked = true;
+
+      document.getElementById('upiPanel').style.display = (method === 'UPI') ? 'block' : 'none';
+      document.getElementById('cardPanel').style.display = (method === 'Card') ? 'block' : 'none';
+    }
+
+    let paymentOtp = '';
+
+    function validateAndInitiatePayment() {
+      // 1. UPI Validation
+      if (currentPaymentMethod === 'UPI') {
+        const upiUser = document.getElementById('upiUserPart').value.trim();
+        const upiHandle = document.getElementById('upiHandle').value;
+
+        if (!upiUser || upiUser.length < 3) {
+          Homebites.showToast('Please enter your 10-digit mobile number or UPI ID.', true);
+          return;
+        }
+
+        const validHandles = ['@okhdfcbank', '@okaxis', '@oksbi', '@okicici', '@ybl', '@ibl', '@axl', '@paytm', '@upi'];
+        if (!validHandles.includes(upiHandle)) {
+          Homebites.showToast('Please select one of the approved UPI handles.', true);
+          return;
+        }
+
+        const fullUpiId = upiUser + upiHandle;
+        paymentOtp = String(Math.floor(100000 + Math.random() * 900000));
+
+        // Log payment request details; the OTP remains hidden from the page.
+        console.log("%c========================================================", "color: #06D6A0; font-size: 14px; font-weight: bold;");
+        console.log("%c📲 UPI PAYMENT GATEWAY REQUEST", "color: #FF6B35; font-size: 15px; font-weight: bold;");
+        console.log(`%c👉 Payment request link sent to UPI registered mobile: %chttps://upi.homebites.in/pay/${encodeURIComponent(fullUpiId)}`, "color: #FFFFFF; font-size: 13px;", "color: #FFC300; font-weight: bold;");
+        console.log("%c👉 Payment OTP: %c" + paymentOtp, "color: #FFFFFF; font-size: 13px;", "color: #06D6A0; font-size: 16px; font-weight: bold; background:#16213E; padding: 2px 6px; border-radius: 4px;");
+        console.log("%c========================================================", "color: #06D6A0; font-size: 14px; font-weight: bold;");
+
+        // Show intermediate popup
+        document.getElementById('processingMsg').innerHTML = `
+          Payment request of <strong>₹${total}</strong> sent to UPI registered mobile:<br/>
+          <strong style="color:var(--orange);font-size:15px;">${fullUpiId}</strong>
+        `;
+        document.getElementById('paymentProcessingModal').classList.add('open');
+
+        setTimeout(() => {
+          document.getElementById('paymentProcessingModal').classList.remove('open');
+          document.getElementById('paymentOtpSubtitle').textContent = `Payment authorization request sent to: ${fullUpiId}. Enter UPI PIN to confirm:`;
+          document.getElementById('payOtpInput').value = '';
+          document.getElementById('paymentOtpModal').classList.add('open');
+        }, 1800);
+        return;
+      }
+
+      // 2. Card Validation
+      if (currentPaymentMethod === 'Card') {
+        const cardNum = document.getElementById('cardNumber').value.trim().replace(/\s+/g, '');
+        const expMonth = parseInt(document.getElementById('cardExpMonth').value, 10);
+        const expYear = parseInt(document.getElementById('cardExpYear').value, 10);
+        const cvv = document.getElementById('cardCvv').value.trim();
+
+        if (!/^\d{12}$/.test(cardNum)) {
+          Homebites.showToast('Card number must be exactly 12 numeric digits.', true);
+          return;
+        }
+
+        if (!/^\d{3}$/.test(cvv)) {
+          Homebites.showToast('CVV must be exactly 3 numeric digits.', true);
+          return;
+        }
+
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth() + 1;
+
+        if (expYear < currentYear || (expYear === currentYear && expMonth < currentMonth)) {
+          Homebites.showToast('Card has expired! Expiry must be valid for the current date.', true);
+          return;
+        }
+
+        paymentOtp = String(Math.floor(100000 + Math.random() * 900000));
+        console.log("%c💳 CARD PAYMENT AUTHORIZATION", "color: #FF6B35; font-size: 15px; font-weight: bold;");
+        console.log("%c👉 Card payment OTP: %c" + paymentOtp, "color: #FFFFFF; font-size: 13px;", "color: #06D6A0; font-size: 16px; font-weight: bold; background:#16213E; padding: 2px 6px; border-radius: 4px;");
+
+        document.getElementById('paymentOtpSubtitle').textContent = 'Enter your 6-digit Bank Authorization PIN to confirm:';
+        document.getElementById('payOtpInput').value = '';
+        document.getElementById('paymentOtpModal').classList.add('open');
+        return;
+      }
+
+      // COD directly places order
+      executeOrderPlacement();
+    }
+
+    function closePaymentOtpModal() {
+      document.getElementById('paymentOtpModal').classList.remove('open');
+    }
+
+    function confirmAndPlaceOrderFinal() {
+      const enteredOtp = document.getElementById('payOtpInput').value.trim();
+      if (!/^\d{6}$/.test(enteredOtp) || enteredOtp !== paymentOtp) {
+        Homebites.showToast('Incorrect payment OTP. Enter the 6-digit OTP shown in the browser console.', true);
+        return;
+      }
+      closePaymentOtpModal();
+      executeOrderPlacement();
+    }
+
+    async function executeOrderPlacement() {
+      const btn = document.getElementById('btnPlaceOrder');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing Order...';
+
+      const items = cart.map(i => ({ mealId: i.mealId, quantity: i.quantity }));
+      const notes = document.getElementById('customerNotes').value.trim();
+
+      try {
+        const response = await fetch(`${API_BASE}/order`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: user.id,
+            addressId: parseInt(addressId, 10),
+            paymentMethod: currentPaymentMethod,
+            customerNotes: notes,
+            items
+          })
+        });
+
+        const data = await response.json();
+        if (response.ok && data.success) {
+          // Save cart snapshot for order-success page
+          localStorage.setItem('homebites_order_snapshot', JSON.stringify({
+            cart: cart,
+            paymentMethod: currentPaymentMethod,
+            total: total,
+            orderNumber: data.orderNumber,
+            orderId: data.orderId
+          }));
+          Homebites.saveCart([]); // clear cart
+          Homebites.showToast('🎉 Order placed successfully!');
+          setTimeout(() => {
+            window.location.href = `order-success.html?orderId=${data.orderId}&orderNumber=${data.orderNumber}`;
+          }, 800);
+        } else {
+          Homebites.showToast(data.message || 'Failed to place order.', true);
+          btn.disabled = false;
+          btn.innerHTML = 'Place Order Now →';
+        }
+      } catch (err) {
+        Homebites.showToast('Could not connect to server.', true);
+        btn.disabled = false;
+        btn.innerHTML = 'Place Order Now →';
+      }
+    }
+  </script>
+</body>
+</html>

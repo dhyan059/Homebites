@@ -1,0 +1,12 @@
+﻿{
+  "csharp.inlayHints.enableInlayHintsForParameters": true,
+  "csharp.inlayHints.enableInlayHintsForTypes": true,
+  "liveServer.settings.root": "/Frontend",
+  "liveServer.settings.port": 5500,
+  "files.exclude": {
+    "**/.vs": true,
+    "**/bin": true,
+    "**/obj": true,
+    "**/*.user": true
+  }
+}

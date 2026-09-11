@@ -1,0 +1,483 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Orders & Live Tracking – HomeBites Hyderabad</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --orange: #FF6B35; --orange2: #FF8C42; --yellow: #FFC300;
+      --red: #E63946; --green: #06D6A0; --dark: #1A1A2E; --dark2: #16213E;
+      --white: #FFFFFF;
+    }
+    body { font-family: 'Poppins', sans-serif; background: var(--dark); color: var(--white); padding-bottom: 70px; }
+    a { text-decoration: none; color: inherit; }
+    .header {
+      background: rgba(26,26,46,0.95); backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(255,107,53,0.2);
+      padding: 16px 5%; display: flex; align-items: center; justify-content: space-between;
+    }
+    .container { max-width: 900px; margin: 30px auto; padding: 0 16px; }
+    
+    .order-card {
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px; padding: 24px; margin-bottom: 24px; transition: transform 0.2s;
+    }
+    .order-header {
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 14px; margin-bottom: 16px;
+    }
+    .status-badge {
+      padding: 5px 14px; border-radius: 50px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .status-badge.accepted { background: rgba(255,107,53,0.15); border: 1px solid var(--orange); color: var(--orange); }
+    .status-badge.preparing { background: rgba(255,195,0,0.15); border: 1px solid var(--yellow); color: var(--yellow); }
+    .status-badge.delivery { background: rgba(59,130,246,0.15); border: 1px solid #93c5fd; color: #93c5fd; }
+    .status-badge.delivered { background: rgba(6,214,160,0.15); border: 1px solid var(--green); color: var(--green); }
+    .status-badge.refund-req { background: rgba(255,195,0,0.2); border: 1px solid var(--yellow); color: var(--yellow); }
+    .status-badge.refunded { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: rgba(255,255,255,0.7); }
+
+    /* Live Stepper Tracker */
+    .tracking-timeline {
+      display: flex; justify-content: space-between; align-items: center;
+      position: relative; margin: 24px 0 20px; padding: 0 10px;
+    }
+    .tracking-timeline::before {
+      content: ''; position: absolute; top: 18px; left: 30px; right: 30px; height: 3px;
+      background: rgba(255,255,255,0.1); z-index: 1;
+    }
+    .tracking-step {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      position: relative; z-index: 2; width: 80px; text-align: center;
+    }
+    .step-icon {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.2);
+      display: flex; align-items: center; justify-content: center; font-size: 14px;
+      color: rgba(255,255,255,0.6); transition: all 0.3s;
+    }
+    .tracking-step.active .step-icon {
+      background: var(--orange); border-color: #fff; color: #fff; box-shadow: 0 0 15px rgba(255,107,53,0.6);
+    }
+    .tracking-step.completed .step-icon {
+      background: var(--green); border-color: #fff; color: #fff;
+    }
+    .step-label { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.7); }
+    .tracking-step.active .step-label { color: var(--orange); font-weight: 700; }
+    .tracking-step.completed .step-label { color: var(--green); font-weight: 600; }
+
+    /* Refund Notification Banner */
+    .refund-banner {
+      padding: 12px 16px; border-radius: 12px; margin-bottom: 16px; font-size: 13px; line-height: 1.5;
+    }
+    .refund-banner.pending {
+      background: rgba(255,195,0,0.12); border: 1.5px dashed rgba(255,195,0,0.4); color: var(--yellow);
+    }
+    .refund-banner.approved {
+      background: rgba(6,214,160,0.12); border: 1.5px solid rgba(6,214,160,0.35); color: var(--green);
+    }
+    .refund-banner.declined {
+      background: rgba(230,57,70,0.12); border: 1.5px solid rgba(230,57,70,0.35); color: #ff6b6b;
+    }
+
+    .rider-card {
+      background: rgba(255,107,53,0.08); border: 1px solid rgba(255,107,53,0.2);
+      border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px; font-size: 13px;
+    }
+    .rider-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--orange); display: flex; align-items: center; justify-content: center; font-size: 16px; color: #fff; }
+
+    .item-row { display: flex; justify-content: space-between; font-size: 13.5px; color: rgba(255,255,255,0.85); margin-bottom: 6px; }
+
+    /* Action Buttons in Order Card */
+    .order-actions-bar {
+      display: flex; gap: 10px; align-items: center; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.07); flex-wrap: wrap;
+    }
+    .btn-customer-action {
+      padding: 8px 16px; border-radius: 10px; font-size: 12.5px; font-weight: 700; cursor: pointer; border: none; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;
+    }
+    .btn-rate { background: rgba(255,195,0,0.15); color: var(--yellow); border: 1px solid rgba(255,195,0,0.3); }
+    .btn-rate:hover { background: var(--yellow); color: var(--dark); }
+    .btn-refund { background: rgba(230,57,70,0.12); color: #ff6b6b; border: 1px solid rgba(230,57,70,0.3); }
+    .btn-refund:hover { background: var(--red); color: #fff; }
+
+    /* Modals */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
+      display: none; align-items: center; justify-content: center; z-index: 9999; padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-card {
+      width: min(460px, 100%); background: #16213E; border: 1px solid var(--orange);
+      border-radius: 20px; padding: 28px; color: #fff;
+    }
+    .modal-card h3 { margin-bottom: 14px; font-size: 18px; }
+    .star-rating-row {
+      display: flex; gap: 8px; justify-content: center; font-size: 32px; color: rgba(255,255,255,0.25); margin: 16px 0; cursor: pointer;
+    }
+    .star-rating-row .star.selected, .star-rating-row .star:hover { color: var(--yellow); }
+    .form-group { margin-bottom: 14px; text-align: left; }
+    .form-group label { display: block; font-size: 12.5px; font-weight: 600; margin-bottom: 6px; color: rgba(255,255,255,0.8); }
+    .form-group select, .form-group textarea {
+      width: 100%; padding: 10px 14px; background: rgba(255,255,255,0.07);
+      border: 1.5px solid rgba(255,255,255,0.14); border-radius: 10px;
+      color: #fff; font-family: inherit; font-size: 13.5px; outline: none;
+    }
+    .form-group textarea { height: 80px; resize: none; }
+    .modal-btns { display: flex; gap: 10px; margin-top: 18px; }
+    .modal-btn {
+      flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; font-size: 14px; font-family: inherit;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <a href="../index.html" style="font-weight:800;font-size:20px;">🍽️ Home<em style="color:var(--orange);font-style:normal;">Bites</em></a>
+    <div style="display:flex;align-items:center;gap:14px;">
+      <a href="menu.html" style="color:var(--orange);font-size:13.5px;font-weight:600;"><i class="fa-solid fa-bowl-food"></i> Menu</a>
+      <a href="profile.html" style="color:rgba(255,255,255,0.8);font-size:13.5px;font-weight:600;"><i class="fa-solid fa-user"></i> Profile</a>
+      <button onclick="Homebites.logout()" style="background:none;border:none;color:#ff6b6b;font-size:13.5px;font-weight:600;cursor:pointer;">Logout</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <div>
+        <h2 style="font-size:22px;">📦 My Orders & Live Tracking</h2>
+        <p style="font-size:13px;color:rgba(255,255,255,0.6);" id="userWelcomeSubtitle">Your personal order history</p>
+      </div>
+      <a href="menu.html" style="padding:8px 18px;border-radius:50px;background:linear-gradient(135deg,var(--orange),var(--yellow));color:var(--dark);font-size:13px;font-weight:700;">
+        + Order More
+      </a>
+    </div>
+
+    <div id="ordersContainer">
+      <div style="text-align:center;padding:40px;color:rgba(255,255,255,0.5);">
+        <i class="fa-solid fa-spinner fa-spin fa-2x"></i><br/><br/>
+        Fetching your personal orders...
+      </div>
+    </div>
+  </div>
+
+  <!-- RATE ORDER MODAL -->
+  <div class="modal-overlay" id="rateModal">
+    <div class="modal-card">
+      <div style="font-size:38px;text-align:center;margin-bottom:8px;">⭐</div>
+      <h3 style="text-align:center;">Rate Your Meal</h3>
+      <p style="text-align:center;font-size:13px;color:rgba(255,255,255,0.6);">How was your home-cooked food experience?</p>
+
+      <div class="star-rating-row" id="starContainer">
+        <span class="star" onclick="setStars(1)">★</span>
+        <span class="star" onclick="setStars(2)">★</span>
+        <span class="star" onclick="setStars(3)">★</span>
+        <span class="star" onclick="setStars(4)">★</span>
+        <span class="star selected" onclick="setStars(5)">★</span>
+      </div>
+
+      <input type="hidden" id="rateOrderId">
+      <div class="form-group">
+        <label>Your Feedback / Review (Optional)</label>
+        <textarea id="rateReviewText" placeholder="e.g. Delicious hot food, loved the spices!"></textarea>
+      </div>
+
+      <div class="modal-btns">
+        <button class="modal-btn" onclick="submitRating()" style="background:var(--orange);color:#fff">Submit Rating</button>
+        <button class="modal-btn" onclick="closeModals()" style="background:rgba(255,255,255,.08);color:#fff">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REQUEST REFUND MODAL -->
+  <div class="modal-overlay" id="refundModal">
+    <div class="modal-card">
+      <div style="font-size:38px;text-align:center;margin-bottom:8px;">⚠️</div>
+      <h3 style="text-align:center;">Request Order Refund</h3>
+      <p style="text-align:center;font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:14px;">
+        Tell us what went wrong. Your request will be forwarded directly to the kitchen admin for approval.
+      </p>
+
+      <input type="hidden" id="refundOrderId">
+      <div class="form-group">
+        <label>Select Primary Reason</label>
+        <select id="refundReasonSelect">
+          <option value="Food quality or taste was not acceptable">Food quality or taste was not acceptable</option>
+          <option value="Wrong food items or dishes were delivered">Wrong food items or dishes were delivered</option>
+          <option value="Food arrived cold or excessively delayed">Food arrived cold or excessively delayed</option>
+          <option value="Packaging was damaged / food spillage">Packaging was damaged / food spillage</option>
+          <option value="Other grievance">Other issue / grievance</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Additional Details</label>
+        <textarea id="refundDetails" placeholder="Describe what happened so our admin can review and approve your refund promptly..."></textarea>
+      </div>
+
+      <div class="modal-btns">
+        <button class="modal-btn" onclick="submitRefundRequest()" style="background:var(--red);color:#fff">Submit Refund Request</button>
+        <button class="modal-btn" onclick="closeModals()" style="background:rgba(255,255,255,.08);color:#fff">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../Scripts/page-runtime.js"></script>
+  <script src="../Scripts/auth.js"></script>
+  <script src="../Scripts/orders.js"></script>
+  <script>
+    const user = Homebites.getUser();
+    let currentRatingStars = 5;
+
+    if (!user) {
+      Homebites.showToast('Please login to view your personal orders.', true);
+      setTimeout(() => { window.location.href = 'login.html'; }, 800);
+    } else {
+      document.getElementById('userWelcomeSubtitle').textContent = `Orders for ${user.fullName} (${user.email})`;
+      loadOrders();
+    }
+
+    function closeModals() {
+      document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('open'));
+    }
+
+    function setStars(n) {
+      currentRatingStars = n;
+      const stars = document.querySelectorAll('#starContainer .star');
+      stars.forEach((s, idx) => {
+        if (idx < n) s.classList.add('selected');
+        else s.classList.remove('selected');
+      });
+    }
+
+    function openRateModal(orderId) {
+      document.getElementById('rateOrderId').value = orderId;
+      document.getElementById('rateReviewText').value = '';
+      setStars(5);
+      document.getElementById('rateModal').classList.add('open');
+    }
+
+    async function submitRating() {
+      const id = document.getElementById('rateOrderId').value;
+      const review = document.getElementById('rateReviewText').value.trim();
+
+      try {
+        const res = await fetch(`${API_BASE}/order/${id}/rate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ rating: currentRatingStars, review })
+        });
+        const d = await res.json();
+        if (res.ok && d.success) {
+          closeModals();
+          Homebites.showToast('⭐ Thank you for rating your meal!');
+          await loadOrders();
+        } else {
+          Homebites.showToast(d.message || 'Error submitting rating.', true);
+        }
+      } catch(e) {
+        Homebites.showToast('Server error.', true);
+      }
+    }
+
+    function openRefundModal(orderId) {
+      document.getElementById('refundOrderId').value = orderId;
+      document.getElementById('refundDetails').value = '';
+      document.getElementById('refundModal').classList.add('open');
+    }
+
+    async function submitRefundRequest() {
+      const id = document.getElementById('refundOrderId').value;
+      const selectVal = document.getElementById('refundReasonSelect').value;
+      const details = document.getElementById('refundDetails').value.trim();
+      const reason = details ? `${selectVal}: ${details}` : selectVal;
+
+      try {
+        const res = await fetch(`${API_BASE}/order/${id}/request-refund`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reason })
+        });
+        const d = await res.json();
+        if (res.ok && d.success) {
+          closeModals();
+          Homebites.showToast('✅ Refund request submitted for Admin review.');
+          await loadOrders();
+        } else {
+          Homebites.showToast(d.message || 'Could not submit refund request.', true);
+        }
+      } catch(e) {
+        Homebites.showToast('Server error submitting refund request.', true);
+      }
+    }
+
+    function getStepClass(stepIndex, currentStatus) {
+      const statusMap = {
+        'Accepted': 0,
+        'Preparing': 1,
+        'Ready': 2,
+        'PickedUp': 2,
+        'Delivered': 3,
+        'Refund Requested': 3,
+        'Refunded': -1,
+        'Cancelled': -1
+      };
+      const currentIdx = statusMap[currentStatus] ?? 0;
+      if (currentIdx === -1) return '';
+      if (stepIndex < currentIdx) return 'completed';
+      if (stepIndex === currentIdx) return 'active';
+      return '';
+    }
+
+    function getBadgeClass(status) {
+      if (status === 'Accepted') return 'accepted';
+      if (status === 'Preparing') return 'preparing';
+      if (status === 'Ready' || status === 'PickedUp') return 'delivery';
+      if (status === 'Delivered') return 'delivered';
+      if (status === 'Refund Requested') return 'refund-req';
+      return 'refunded';
+    }
+
+    async function loadOrders() {
+      const container = document.getElementById('ordersContainer');
+      try {
+        const response = await fetch(`${API_BASE}/order/user/${user.id}`);
+        const result = await response.json();
+
+        if (response.ok && result.success && result.data.length > 0) {
+          container.innerHTML = result.data.map((o) => {
+            const bClass = getBadgeClass(o.orderStatus);
+            const isRefundRequested = o.orderStatus === 'Refund Requested';
+            const isRefunded = o.orderStatus === 'Refunded';
+            const isDelivered = o.orderStatus === 'Delivered';
+            const hasNotes = o.customerNotes && o.customerNotes.includes('Rating:');
+
+            let refundBannerHtml = '';
+            if (isRefundRequested) {
+              refundBannerHtml = `
+                <div class="refund-banner pending">
+                  <i class="fa-solid fa-hourglass-half"></i> <strong>Refund Requested:</strong> Under review by kitchen admin.<br/>
+                  <small style="color:rgba(255,255,255,0.8);">Reason: "${o.cancellationReason || 'Quality/Service Issue'}"</small>
+                </div>
+              `;
+            } else if (isRefunded) {
+              refundBannerHtml = `
+                <div class="refund-banner approved">
+                  <i class="fa-solid fa-circle-check"></i> <strong>Refund Approved & Processed!</strong><br/>
+                  <small style="color:rgba(255,255,255,0.8);">${o.cancellationReason || 'Amount credited back to your account.'}</small>
+                </div>
+              `;
+            } else if (o.cancellationReason && o.cancellationReason.includes('declined')) {
+              refundBannerHtml = `
+                <div class="refund-banner declined">
+                  <i class="fa-solid fa-circle-xmark"></i> <strong>Refund Request Declined:</strong> ${o.cancellationReason}
+                </div>
+              `;
+            }
+
+            return `
+            <div class="order-card">
+              <div class="order-header">
+                <div>
+                  <strong style="font-size:16px;color:var(--orange);">${o.orderNumber}</strong><br/>
+                  <span style="font-size:12px;color:rgba(255,255,255,0.5);">${new Date(o.orderDate).toLocaleString('en-IN')}</span>
+                </div>
+                <span class="status-badge ${bClass}">
+                  ${isRefundRequested ? '⚠️' : isRefunded ? '💸' : '<i class="fa-solid fa-circle-check"></i>'} 
+                  ${o.orderStatus}
+                </span>
+              </div>
+
+              ${refundBannerHtml}
+
+              <!-- Live 4-Step Interactive Tracking Pipeline -->
+              <div class="tracking-timeline">
+                <div class="tracking-step ${getStepClass(0, o.orderStatus)}">
+                  <div class="step-icon"><i class="fa-solid fa-receipt"></i></div>
+                  <span class="step-label">Accepted</span>
+                </div>
+                <div class="tracking-step ${getStepClass(1, o.orderStatus)}">
+                  <div class="step-icon"><i class="fa-solid fa-fire-burner"></i></div>
+                  <span class="step-label">Preparing</span>
+                </div>
+                <div class="tracking-step ${getStepClass(2, o.orderStatus)}">
+                  <div class="step-icon"><i class="fa-solid fa-motorcycle"></i></div>
+                  <span class="step-label">Out for Delivery</span>
+                </div>
+                <div class="tracking-step ${getStepClass(3, o.orderStatus)}">
+                  <div class="step-icon"><i class="fa-solid fa-house-chimney"></i></div>
+                  <span class="step-label">Delivered</span>
+                </div>
+              </div>
+
+              <!-- Delivery Rider / Kitchen Details -->
+              <div class="rider-card">
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <div class="rider-avatar"><i class="fa-solid fa-moped"></i></div>
+                  <div>
+                    <strong>Rider: Suresh K. (Hyderabad Fleet)</strong><br/>
+                    <span style="font-size:11.5px;color:rgba(255,255,255,0.6);">Dispatched from Madhapur Kitchen · Central Hyderabad Radius</span>
+                  </div>
+                </div>
+                <a href="tel:+919876543210" style="padding:6px 12px;border-radius:8px;background:rgba(6,214,160,0.15);color:var(--green);border:1px solid var(--green);font-size:12px;font-weight:700;">
+                  <i class="fa-solid fa-phone"></i> Call
+                </a>
+              </div>
+
+              <!-- Ordered Items -->
+              <div style="background:rgba(255,255,255,0.03);border-radius:12px;padding:14px;margin-bottom:12px;">
+                ${o.items.map(it => `
+                  <div class="item-row">
+                    <span>${it.isVeg ? '🟢' : '🔴'} ${it.mealName} × <strong>${it.quantity}</strong></span>
+                    <span>₹${it.itemTotal}</span>
+                  </div>
+                `).join('')}
+              </div>
+
+              <div style="display:flex;justify-content:space-between;align-items:center;padding-top:4px;">
+                <span style="font-size:13px;color:rgba(255,255,255,0.6);">Payment: <strong>${o.paymentMethod} (${o.paymentStatus})</strong></span>
+                <span style="font-size:17px;font-weight:800;color:var(--orange);">Total Paid: ₹${o.totalAmount}</span>
+              </div>
+
+              <!-- Customer Feedback & Refund Action Bar -->
+              <div class="order-actions-bar">
+                ${isDelivered || isRefundRequested || isRefunded ? `
+                  <button class="btn-customer-action btn-rate" onclick="openRateModal(${o.id})">
+                    <i class="fa-solid fa-star"></i> ${hasNotes ? 'Update Rating' : 'Rate Food'}
+                  </button>
+                ` : ''}
+
+                ${isDelivered && !isRefundRequested && !isRefunded && o.paymentMethod !== 'CashOnDelivery' ? `
+                  <button class="btn-customer-action btn-refund" onclick="openRefundModal(${o.id})">
+                    <i class="fa-solid fa-rotate-left"></i> Request Refund
+                  </button>
+                ` : ''}
+
+                ${hasNotes ? `<span style="font-size:12px;color:var(--yellow);margin-left:auto;">${o.customerNotes.match(/\[Rating:[^\]]+\]/)?.[0] || '⭐ Rated'}</span>` : ''}
+              </div>
+            </div>
+          `;
+          }).join('');
+        } else {
+          container.innerHTML = `
+            <div style="text-align:center;padding:60px 20px;background:rgba(255,255,255,0.03);border-radius:20px;">
+              <div style="font-size:48px;margin-bottom:14px;">📦</div>
+              <h3 style="font-size:18px;margin-bottom:8px;">No orders found</h3>
+              <p style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:20px;">You haven't placed any home meal orders yet.</p>
+              <a href="menu.html" style="padding:10px 24px;border-radius:50px;background:var(--orange);color:#fff;font-weight:700;font-size:14px;">Browse 70+ Daily Dishes</a>
+            </div>
+          `;
+        }
+      } catch (err) {
+        container.innerHTML = '<div style="text-align:center;padding:30px;color:#ff6b6b;">Failed to fetch orders from server.</div>';
+      }
+    }
+
+    // Auto-refresh orders every 15 seconds for live tracking updates
+    setInterval(loadOrders, 15000);
+  </script>
+</body>
+</html>

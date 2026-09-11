@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin Login - HomeBites</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Poppins',sans-serif;background:linear-gradient(135deg,#0d0d1a 0%,#1a1a2e 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+    .card{width:min(420px,100%);background:rgba(255,255,255,.05);border:1px solid rgba(255,107,53,.3);border-radius:24px;padding:40px 32px;box-shadow:0 30px 80px rgba(0,0,0,.5);color:#fff}
+    .logo{text-align:center;margin-bottom:28px}
+    .logo-icon{width:60px;height:60px;border-radius:16px;background:linear-gradient(135deg,#FF6B35,#FFC300);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 12px;box-shadow:0 6px 20px rgba(255,107,53,.4)}
+    h1{font-size:22px;font-weight:800;color:#fff;text-align:center}
+    .sub{font-size:13px;color:rgba(255,255,255,.5);text-align:center;margin-bottom:28px}
+    .badge{display:inline-block;background:rgba(255,107,53,.15);border:1px solid rgba(255,107,53,.35);color:#FF6B35;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;margin-bottom:8px}
+    .form-group{margin-bottom:16px}
+    label{display:block;font-size:12.5px;font-weight:600;margin-bottom:6px;color:rgba(255,255,255,.8)}
+    .input-box{position:relative}
+    .input-box i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,.35);font-size:14px}
+    input{width:100%;padding:12px 14px 12px 42px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.12);border-radius:12px;color:#fff;font-family:inherit;font-size:14px;outline:none}
+    input:focus{border-color:#FF6B35}
+    .btn{width:100%;padding:14px;border-radius:12px;border:none;cursor:pointer;background:linear-gradient(135deg,#FF6B35,#FFC300);color:#1A1A2E;font-weight:800;font-size:15px;font-family:inherit;transition:transform .2s}
+    .btn:hover{transform:translateY(-2px)}
+    .err{color:#ff6b6b;font-size:12.5px;text-align:center;margin-top:12px;display:none}
+    .home-link{display:block;color:rgba(255,255,255,.55);font-size:12px;text-align:center;margin-top:18px}
+    .home-link:hover{color:#FF6B35}
+
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <div class="logo-icon">&#9881;&#65039;</div>
+    <span class="badge">ADMIN PORTAL</span>
+    <h1>HomeBites Admin</h1>
+    <p class="sub">Secure access for authorized personnel only</p>
+  </div>
+  <div class="form-group">
+    <label>Admin Email</label>
+    <div class="input-box">
+      <i class="fa-solid fa-envelope"></i>
+      <input type="email" id="adminEmail" placeholder="Enter admin email" autocomplete="off">
+    </div>
+  </div>
+  <div class="form-group">
+    <label>Password</label>
+    <div class="input-box">
+      <i class="fa-solid fa-lock"></i>
+      <input type="password" id="adminPass" placeholder="Enter admin password" autocomplete="off">
+    </div>
+  </div>
+  <button class="btn" onclick="doAdminLogin()"><i class="fa-solid fa-shield-halved"></i> Access Dashboard</button>
+  <p class="err" id="errMsg"></p>
+  <a class="home-link" href="../index.html">&larr; Back to Homepage</a>
+</div>
+<script>
+  const ADMIN_API = 'http://localhost:5000/api/admin';
+  async function doAdminLogin() {
+    const email = document.getElementById('adminEmail').value.trim();
+    const pass  = document.getElementById('adminPass').value;
+    const err   = document.getElementById('errMsg');
+    err.style.display = 'none';
+    try {
+      const r = await fetch(ADMIN_API + '/login', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({email, password: pass})
+      });
+      const d = await r.json();
+      if (r.ok && d.success) {
+        sessionStorage.setItem('hb_admin', JSON.stringify(d.admin));
+        window.location.href = 'dashboard.html';
+      } else {
+        err.textContent = d.message || 'Login failed.';
+        err.style.display = 'block';
+      }
+    } catch(e) {
+      err.textContent = 'Cannot connect to backend server.';
+      err.style.display = 'block';
+    }
+  }
+  document.addEventListener('keydown', e => { if(e.key==='Enter') doAdminLogin(); });
+</script>
+</body>
+</html>

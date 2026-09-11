@@ -1,0 +1,60 @@
+﻿{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/Backend/Homebites.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "clean",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "clean",
+        "${workspaceFolder}/Backend/Homebites.csproj"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "run-backend",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "run",
+        "--project",
+        "${workspaceFolder}/Backend/Homebites.csproj",
+        "--launch-profile",
+        "http"
+      ],
+      "problemMatcher": "$msCompile",
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "open-frontend",
+      "command": "powershell",
+      "type": "shell",
+      "args": [
+        "-Command",
+        "Start-Process",
+        "'${workspaceFolder}/Frontend/index.html'"
+      ],
+      "problemMatcher": []
+    }
+  ]
+}

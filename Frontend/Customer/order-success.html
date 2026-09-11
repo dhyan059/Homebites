@@ -1,0 +1,142 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Order Placed! - HomeBites Hyderabad</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--orange:#FF6B35;--yellow:#FFC300;--green:#06D6A0;--dark:#1A1A2E;--dark2:#16213E;--white:#FFFFFF}
+    body{font-family:"Poppins",sans-serif;background:radial-gradient(circle at top,#16213E 0%,#1A1A2E 100%);color:var(--white);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px;overflow:hidden}
+
+    /* Confetti */
+    .confetti-piece{position:fixed;width:10px;height:10px;border-radius:2px;animation:confettiFall linear forwards;pointer-events:none;}
+    @keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
+
+    /* Check animation */
+    @keyframes popIn{0%{transform:scale(0);opacity:0}60%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+    @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(6,214,160,.5)}70%{box-shadow:0 0 0 16px rgba(6,214,160,0)}}
+
+    .success-card{width:min(560px,100%);background:rgba(255,255,255,.05);border:1px solid rgba(6,214,160,.3);backdrop-filter:blur(20px);border-radius:24px;padding:36px 28px;box-shadow:0 30px 80px rgba(0,0,0,.5);text-align:center}
+    .check-circle{width:80px;height:80px;border-radius:50%;margin:0 auto 20px;background:rgba(6,214,160,.15);border:2.5px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:36px;color:var(--green);animation:popIn .5s ease both,pulse 2s 0.5s infinite}
+    h1{font-size:26px;font-weight:800;margin-bottom:6px}
+    .subtitle{font-size:14px;color:rgba(255,255,255,.6);margin-bottom:22px}
+    .info-box{background:rgba(255,255,255,.06);border-radius:16px;padding:20px;margin-bottom:20px;text-align:left}
+    .info-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:14px}
+    .info-row:last-child{margin-bottom:0}
+    .info-label{color:rgba(255,255,255,.6)}
+    .info-val{font-weight:700;text-align:right}
+    .divider{height:1px;background:rgba(255,255,255,.07);margin:12px 0}
+    .items-list{text-align:left;margin-bottom:18px}
+    .items-list h4{font-size:13px;color:rgba(255,255,255,.5);margin-bottom:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+    .order-item-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13.5px}
+    .order-item-row:last-child{border-bottom:none}
+    .order-item-img{width:40px;height:40px;border-radius:8px;object-fit:cover;flex-shrink:0;background:#16213E}
+    .order-item-name{flex:1;font-weight:600}
+    .order-item-qty{color:rgba(255,255,255,.5);font-size:12px}
+    .order-item-price{color:var(--orange);font-weight:700}
+    .countdown-bar{font-size:12px;color:rgba(255,255,255,.4);margin-bottom:18px}
+    .countdown-bar span{color:var(--orange);font-weight:700}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+    .btn-a{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:12px;font-weight:700;font-size:14px;cursor:pointer;transition:transform .2s;text-decoration:none;font-family:inherit}
+    .btn-a:hover{transform:translateY(-2px)}
+    .btn-primary{background:linear-gradient(135deg,var(--orange),var(--yellow));color:var(--dark);border:none}
+    .btn-secondary{background:rgba(255,255,255,.08);color:var(--white);border:1px solid rgba(255,255,255,.15)}
+    .delivery-eta{background:rgba(6,214,160,.1);border:1px solid rgba(6,214,160,.25);border-radius:12px;padding:12px 16px;margin-bottom:18px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;color:var(--green)}
+  </style>
+</head>
+<body>
+  <div class="success-card">
+    <div class="check-circle"><i class="fa-solid fa-check"></i></div>
+    <h1>Order Placed! &#127881;</h1>
+    <p class="subtitle">Your homestyle meal is being freshly prepared at Madhapur Central Kitchen.</p>
+
+    <div class="delivery-eta">
+      <i class="fa-solid fa-motorcycle"></i>
+      <span>Estimated Delivery: <strong>30 - 35 minutes</strong> to your door</span>
+    </div>
+
+    <div class="info-box">
+      <div class="info-row">
+        <span class="info-label">Order Number</span>
+        <strong id="dispOrderNumber" style="color:var(--orange);">Processing...</strong>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Payment Method</span>
+        <span id="dispPayMethod" class="info-val">-</span>
+      </div>
+      <div class="divider"></div>
+      <div class="info-row">
+        <span class="info-label">Total Paid</span>
+        <strong id="dispTotal" style="color:var(--green);font-size:18px;">-</strong>
+      </div>
+    </div>
+
+    <div class="items-list" id="itemsList"></div>
+
+    <p class="countdown-bar">Auto-redirecting to your orders in <span id="countdownNum">30</span>s</p>
+
+    <div class="actions">
+      <a href="my-orders.html" class="btn-a btn-primary"><i class="fa-solid fa-list-check"></i> View My Orders</a>
+      <a href="menu.html" class="btn-a btn-secondary"><i class="fa-solid fa-utensils"></i> Order More</a>
+    </div>
+  </div>
+
+  <script>
+    // Confetti burst
+    var colors = ["#FF6B35","#FFC300","#06D6A0","#E63946","#A855F7","#3B82F6"];
+    for (var ci = 0; ci < 35; ci++) {
+      (function(i) {
+        setTimeout(function() {
+          var el = document.createElement("div");
+          el.className = "confetti-piece";
+          el.style.cssText = "left:" + Math.random()*100 + "vw;background:" + colors[i%colors.length] + ";animation-duration:" + (1.5+Math.random()*2) + "s;animation-delay:" + Math.random()*0.5 + "s;";
+          document.body.appendChild(el);
+          setTimeout(function(){ el.remove(); }, 4000);
+        }, i * 30);
+      })(ci);
+    }
+
+    // Read URL params
+    var params = new URLSearchParams(window.location.search);
+    var orderNumber = params.get("orderNumber") || params.get("orderId");
+    if (orderNumber) document.getElementById("dispOrderNumber").textContent = orderNumber;
+
+    // Read snapshot
+    var FALLBACK = "https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=80&q=80";
+    var snapshot = null;
+    try { snapshot = JSON.parse(localStorage.getItem("homebites_order_snapshot")); } catch(e){}
+
+    if (snapshot) {
+      document.getElementById("dispPayMethod").textContent = snapshot.paymentMethod || "-";
+      document.getElementById("dispTotal").textContent = snapshot.total ? "\u20b9" + snapshot.total : "-";
+      if (snapshot.orderNumber) document.getElementById("dispOrderNumber").textContent = snapshot.orderNumber;
+
+      if (snapshot.cart && snapshot.cart.length > 0) {
+        var itemsEl = document.getElementById("itemsList");
+        itemsEl.innerHTML = "<h4>Items Ordered</h4>" + snapshot.cart.map(function(item) {
+          return "<div class=\"order-item-row\">" +
+            "<img class=\"order-item-img\" src=\"" + (item.imageUrl || FALLBACK) + "\" alt=\"" + item.mealName + "\" onerror=\"this.onerror=null;this.src='" + FALLBACK + "'\" />" +
+            "<span class=\"order-item-name\">" + item.mealName + "</span>" +
+            "<span class=\"order-item-qty\">x" + item.quantity + "</span>" +
+            "<span class=\"order-item-price\">\u20b9" + (item.discountPrice * item.quantity) + "</span>" +
+          "</div>";
+        }).join("");
+      }
+      localStorage.removeItem("homebites_order_snapshot");
+    }
+
+    // Countdown redirect
+    var countEl = document.getElementById("countdownNum");
+    var secs = 30;
+    var timer = setInterval(function() {
+      secs--;
+      if (countEl) countEl.textContent = secs;
+      if (secs <= 0) { clearInterval(timer); window.location.href = "my-orders.html"; }
+    }, 1000);
+  </script>
+</body>
+</html>

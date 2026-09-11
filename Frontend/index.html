@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HomeBites – Authentic Home Cooked Meals in Hyderabad</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --orange: #FF6B35; --orange2: #FF8C42; --yellow: #FFC300;
+      --red: #E63946; --green: #06D6A0; --purple: #7B2D8B;
+      --dark: #1A1A2E; --dark2: #16213E; --card: #0F3460;
+      --white: #FFFFFF; --shadow: 0 20px 60px rgba(0,0,0,.18);
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Poppins', sans-serif; background: var(--dark); color: var(--white); overflow-x: hidden; }
+    a { text-decoration: none; color: inherit; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--dark2); }
+    ::-webkit-scrollbar-thumb { background: var(--orange); border-radius: 3px; }
+
+    /* NAVBAR */
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 5%; height: 72px;
+      background: rgba(26,26,46,.9); backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255,107,53,.18); transition: all .3s;
+    }
+    .navbar.scrolled { background: rgba(26,26,46,.98); box-shadow: 0 4px 30px rgba(0,0,0,.5); }
+    .nav-logo { display: flex; align-items: center; gap: 10px; }
+    .nav-logo .logo-icon {
+      width: 42px; height: 42px; border-radius: 12px;
+      background: linear-gradient(135deg, var(--orange), var(--yellow));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; box-shadow: 0 4px 15px rgba(255,107,53,.5);
+    }
+    .nav-logo span { font-size: 22px; font-weight: 800; }
+    .nav-logo span em { font-style: normal; color: var(--orange); }
+    .nav-links { display: flex; align-items: center; gap: 28px; list-style: none; }
+    .nav-links a { font-size: 14px; font-weight: 500; color: rgba(255,255,255,.8); transition: color .2s; }
+    .nav-links a:hover { color: var(--orange); }
+    .nav-actions { display: flex; align-items: center; gap: 12px; }
+    
+    .btn-outline {
+      padding: 9px 20px; border-radius: 50px; border: 2px solid var(--orange);
+      color: var(--orange); font-weight: 600; font-size: 14px;
+      cursor: pointer; transition: all .25s; background: transparent;
+    }
+    .btn-outline:hover { background: var(--orange); color: var(--white); }
+    .btn-primary {
+      padding: 9px 20px; border-radius: 50px;
+      background: linear-gradient(135deg, var(--orange), var(--orange2));
+      color: var(--white); font-weight: 600; font-size: 14px;
+      border: none; cursor: pointer; transition: all .25s;
+      box-shadow: 0 4px 15px rgba(255,107,53,.4);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(255,107,53,.5); }
+
+    /* SIDE DRAWER / HAMBURGER MENU */
+    .side-menu-trigger {
+      width: 42px; height: 42px; border-radius: 12px;
+      background: rgba(255,107,53,.15); border: 1.5px solid rgba(255,107,53,.35);
+      color: var(--orange); font-size: 18px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .25s;
+    }
+    .side-menu-trigger:hover {
+      background: var(--orange); color: var(--white); transform: scale(1.05);
+    }
+
+    .drawer-overlay {
+      position: fixed; inset: 0; z-index: 2500;
+      background: rgba(0,0,0,.7); backdrop-filter: blur(8px);
+      opacity: 0; pointer-events: none; transition: opacity .35s;
+    }
+    .drawer-overlay.open { opacity: 1; pointer-events: all; }
+
+    .side-drawer {
+      position: fixed; top: 0; right: 0; width: min(360px, 86vw); height: 100vh;
+      background: linear-gradient(180deg, #1A1A2E 0%, #16213E 100%);
+      border-left: 1px solid rgba(255,107,53,.25);
+      box-shadow: -15px 0 50px rgba(0,0,0,.6);
+      z-index: 2600; transform: translateX(100%);
+      transition: transform .35s cubic-bezier(.25,.8,.25,1);
+      display: flex; flex-direction: column; padding: 28px 24px;
+      overflow-y: auto;
+    }
+    .drawer-overlay.open .side-drawer { transform: translateX(0); }
+
+    .drawer-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,.08);
+      margin-bottom: 24px;
+    }
+    .drawer-close {
+      width: 38px; height: 38px; border-radius: 10px; border: none;
+      background: rgba(255,255,255,.08); color: rgba(255,255,255,.7);
+      font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all .2s;
+    }
+    .drawer-close:hover { background: var(--red); color: var(--white); }
+
+    .drawer-user-card {
+      background: rgba(255,107,53,.1); border: 1px solid rgba(255,107,53,.25);
+      border-radius: 16px; padding: 18px; margin-bottom: 24px;
+      text-align: center;
+    }
+    .drawer-user-card h4 { font-size: 16px; margin-bottom: 4px; }
+    .drawer-user-card p { font-size: 12px; color: rgba(255,255,255,.6); margin-bottom: 14px; }
+
+    .drawer-menu-list { list-style: none; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+    .drawer-menu-item a, .drawer-menu-item button {
+      width: 100%; display: flex; align-items: center; gap: 14px;
+      padding: 13px 16px; border-radius: 12px;
+      background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.06);
+      color: rgba(255,255,255,.85); font-size: 14px; font-weight: 500;
+      text-align: left; cursor: pointer; transition: all .2s; font-family: inherit;
+    }
+    .drawer-menu-item a:hover, .drawer-menu-item button:hover {
+      background: rgba(255,107,53,.15); border-color: rgba(255,107,53,.35); color: var(--orange);
+      transform: translateX(4px);
+    }
+    .drawer-menu-item i { width: 20px; color: var(--orange); font-size: 16px; }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh; display: flex; align-items: center;
+      padding: 100px 5% 60px; position: relative; overflow: hidden;
+      background: linear-gradient(135deg, var(--dark) 0%, var(--dark2) 50%, #0d1b2a 100%);
+    }
+    .hero::before {
+      content: ''; position: absolute; top: -200px; right: -200px;
+      width: 700px; height: 700px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,107,53,.18) 0%, transparent 70%);
+      animation: pulse 6s ease-in-out infinite;
+    }
+    .hero::after {
+      content: ''; position: absolute; bottom: -150px; left: -150px;
+      width: 500px; height: 500px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(6,214,160,.12) 0%, transparent 70%);
+      animation: pulse 8s ease-in-out infinite reverse;
+    }
+    @keyframes pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.15);opacity:.7} }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+
+    .hero-content { flex: 1.1; max-width: 600px; position: relative; z-index: 2; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255,107,53,.15); border: 1px solid rgba(255,107,53,.35);
+      border-radius: 50px; padding: 7px 18px; font-size: 13px;
+      color: var(--orange); font-weight: 600; margin-bottom: 22px;
+    }
+    .hero h1 { font-size: clamp(2.3rem,4.8vw,3.6rem); font-weight: 900; line-height: 1.16; margin-bottom: 20px; }
+    .hero h1 .highlight {
+      background: linear-gradient(135deg, var(--orange), var(--yellow));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .hero p { font-size: 16px; color: rgba(255,255,255,.72); line-height: 1.7; margin-bottom: 32px; }
+    
+    .branch-pill {
+      display: inline-flex; align-items: center; gap: 12px;
+      background: rgba(6,214,160,.1); border: 1px solid rgba(6,214,160,.3);
+      padding: 10px 18px; border-radius: 14px; margin-bottom: 28px;
+      font-size: 13.5px;
+    }
+    .branch-pill strong { color: var(--green); }
+
+    .hero-buttons { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 40px; }
+    .btn-big {
+      padding: 14px 32px; border-radius: 50px; font-size: 15px; font-weight: 700;
+      cursor: pointer; transition: all .3s; display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-big.primary {
+      background: linear-gradient(135deg, var(--orange), var(--yellow));
+      color: var(--dark); border: none; box-shadow: 0 8px 30px rgba(255,107,53,.45);
+    }
+    .btn-big.primary:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(255,107,53,.6); }
+    .btn-big.secondary { background: transparent; border: 2px solid rgba(255,255,255,.25); color: var(--white); }
+    .btn-big.secondary:hover { border-color: var(--orange); color: var(--orange); }
+
+    .hero-stats { display: flex; gap: 36px; }
+    .stat-item .num { font-size: 28px; font-weight: 800; color: var(--orange); display: block; }
+    .stat-item .lbl { font-size: 12.5px; color: rgba(255,255,255,.6); }
+
+    /* HERO VISUAL: HYDERABAD RESTAURANT HUB & COVERAGE CARD */
+    .hero-visual { flex: 0.95; display: flex; justify-content: center; align-items: center; position: relative; z-index: 2; }
+    .hub-card {
+      width: min(390px, 100%);
+      background: linear-gradient(165deg, rgba(26,26,46,0.92) 0%, rgba(22,33,62,0.95) 100%);
+      border: 1.5px solid rgba(255,107,53,0.3); border-radius: 26px; padding: 26px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1);
+      backdrop-filter: blur(24px); position: relative;
+    }
+    .hub-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(6,214,160,0.12); border: 1px solid rgba(6,214,160,0.35);
+      border-radius: 50px; padding: 5px 14px; font-size: 11.5px; font-weight: 700;
+      color: var(--green); margin-bottom: 14px;
+    }
+    .hub-badge span.pulse-dot {
+      width: 8px; height: 8px; border-radius: 50%; background: var(--green);
+      box-shadow: 0 0 10px var(--green); animation: pulse 2s infinite;
+    }
+    .hub-title { font-size: 19px; font-weight: 800; color: #fff; margin-bottom: 4px; }
+    .hub-loc { font-size: 13px; color: rgba(255,255,255,0.65); display: flex; align-items: center; gap: 6px; margin-bottom: 18px; }
+    .hub-loc i { color: var(--orange); }
+
+    .hub-metrics {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;
+    }
+    .metric-box {
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px; padding: 12px 14px; text-align: left;
+    }
+    .metric-val { font-size: 18px; font-weight: 800; color: var(--orange); }
+    .metric-lbl { font-size: 11px; color: rgba(255,255,255,0.55); margin-top: 2px; }
+
+    .hub-coverage-title {
+      font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.8);
+      text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .hub-coverage-title span { color: var(--yellow); font-size: 11px; }
+
+    .coverage-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 22px; }
+    .cov-tag {
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px; padding: 5px 11px; font-size: 12px; font-weight: 500;
+      color: rgba(255,255,255,0.85); display: flex; align-items: center; gap: 5px;
+    }
+    .cov-tag i { font-size: 9px; color: var(--green); }
+
+    .hub-btn {
+      width: 100%; padding: 14px; border-radius: 14px; border: none; cursor: pointer;
+      background: linear-gradient(135deg, var(--orange), var(--yellow));
+      color: var(--dark); font-weight: 800; font-size: 14.5px;
+      box-shadow: 0 6px 20px rgba(255,107,53,0.4); transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .hub-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(255,107,53,0.55); }
+
+    /* SECTION COMMON */
+    section { padding: 85px 5%; }
+    .section-label { display: inline-block; font-size: 12.5px; font-weight: 700; color: var(--orange); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+    .section-title { font-size: clamp(1.8rem,3.2vw,2.5rem); font-weight: 800; margin-bottom: 12px; }
+    .section-sub { color: rgba(255,255,255,.6); font-size: 15px; max-width: 540px; line-height: 1.7; }
+    .section-head { text-align: center; margin-bottom: 45px; }
+    .section-head .section-sub { margin: 0 auto; }
+
+    /* HOW IT WORKS */
+    .how-section { background: var(--dark2); }
+    .steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 28px; }
+    .step-card {
+      text-align: center; padding: 36px 20px;
+      background: rgba(255,255,255,.04); border-radius: 20px;
+      border: 1px solid rgba(255,255,255,.08); position: relative;
+      transition: transform .3s, box-shadow .3s;
+    }
+    .step-card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(255,107,53,.15); }
+    .step-num {
+      position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+      width: 32px; height: 32px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--orange), var(--yellow));
+      color: var(--dark); font-weight: 800; font-size: 14px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .step-icon { width: 64px; height: 64px; border-radius: 18px; margin: 10px auto 16px; display: flex; align-items: center; justify-content: center; font-size: 28px; }
+    .step-icon.s1 { background: rgba(255,107,53,.2); }
+    .step-icon.s2 { background: rgba(255,195,0,.2); }
+    .step-icon.s3 { background: rgba(6,214,160,.2); }
+    .step-icon.s4 { background: rgba(123,45,139,.25); }
+    .step-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+    .step-card p { font-size: 13.5px; color: rgba(255,255,255,.6); line-height: 1.6; }
+
+    /* MENU SECTION */
+    .meals-section { background: var(--dark); }
+    .menu-info-bar {
+      max-width: 680px; margin: 0 auto 35px;
+      background: rgba(255,195,0,.08); border: 1px solid rgba(255,195,0,.25);
+      border-radius: 16px; padding: 14px 20px; display: flex; align-items: center; gap: 14px;
+    }
+    .menu-info-bar .icon { font-size: 28px; }
+    .menu-info-bar .title { font-weight: 700; font-size: 14.5px; color: var(--yellow); }
+    .menu-info-bar .desc { font-size: 12.5px; color: rgba(255,255,255,.65); margin-top: 2px; }
+
+    .filter-tabs { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 40px; }
+    .tab-btn {
+      padding: 9px 22px; border-radius: 50px; font-size: 13.5px; font-weight: 600;
+      border: 1.5px solid rgba(255,255,255,.15); color: rgba(255,255,255,.75);
+      cursor: pointer; transition: all .25s; background: transparent;
+    }
+    .tab-btn.active, .tab-btn:hover {
+      background: linear-gradient(135deg, var(--orange), var(--orange2));
+      border-color: transparent; color: var(--white);
+      box-shadow: 0 4px 15px rgba(255,107,53,.4);
+    }
+
+    .meals-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 26px; }
+    .meal-card {
+      background: rgba(255,255,255,.05); border-radius: 20px;
+      border: 1px solid rgba(255,255,255,.08); overflow: hidden;
+      transition: transform .3s, box-shadow .3s; display: flex; flex-direction: column;
+    }
+    .meal-card:hover { transform: translateY(-6px); box-shadow: 0 20px 50px rgba(255,107,53,.18); }
+    .meal-thumb { height: 180px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #16213e; }
+    .meal-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s ease; }
+    .meal-card:hover .meal-thumb img { transform: scale(1.06); }
+    
+    .veg-tag {
+      position: absolute; top: 12px; left: 12px; padding: 4px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 700; display: flex; align-items: center; gap: 5px;
+    }
+    .veg-tag.veg { background: rgba(6,214,160,.9); color: var(--dark); }
+    .veg-tag.nonveg { background: rgba(230,57,70,.9); color: var(--white); }
+    
+    .meal-info { padding: 18px; flex: 1; display: flex; flex-direction: column; }
+    .meal-info h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+    .meal-meta { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
+    .meal-meta span { font-size: 12px; color: rgba(255,255,255,.55); display: flex; align-items: center; gap: 4px; }
+    .meal-meta .stars { color: var(--yellow); }
+    .meal-desc { font-size: 12px; color: rgba(255,255,255,.5); margin-bottom: 14px; line-height: 1.5; flex: 1; }
+    .meal-footer { display: flex; align-items: center; justify-content: space-between; }
+    .meal-price { font-size: 20px; font-weight: 800; color: var(--orange); }
+    .meal-price del { font-size: 13px; color: rgba(255,255,255,.4); font-weight: 400; margin-left: 6px; }
+    
+    .cart-btn {
+      width: 40px; height: 40px; border-radius: 12px; border: none; cursor: pointer;
+      background: linear-gradient(135deg, var(--orange), var(--yellow));
+      color: var(--dark); font-size: 17px; display: flex; align-items: center; justify-content: center;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .cart-btn:hover { transform: scale(1.1); box-shadow: 0 6px 20px rgba(255,107,53,.5); }
+
+    .more-menu-bar {
+      margin-top: 45px; text-align: center;
+    }
+    .btn-more-menu {
+      padding: 14px 34px; border-radius: 50px; font-size: 15px; font-weight: 700;
+      background: rgba(255,107,53,.15); border: 2px solid var(--orange);
+      color: var(--orange); cursor: pointer; transition: all .3s;
+      display: inline-flex; align-items: center; gap: 10px;
+    }
+    .btn-more-menu:hover {
+      background: var(--orange); color: var(--white); transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(255,107,53,.4);
+    }
+
+    /* FEATURES */
+    .features-section { background: linear-gradient(135deg, var(--dark2) 0%, #0d1b2a 100%); position: relative; overflow: hidden; }
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 24px; position: relative; }
+    .feature-card { padding: 32px 24px; border-radius: 20px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); transition: all .3s; }
+    .feature-card:hover { transform: translateY(-5px); background: rgba(255,107,53,.07); border-color: rgba(255,107,53,.3); }
+    .feat-icon { width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 18px; }
+    .feat-icon.f1 { background: linear-gradient(135deg, rgba(255,107,53,.3), rgba(255,195,0,.2)); }
+    .feat-icon.f2 { background: linear-gradient(135deg, rgba(6,214,160,.3), rgba(0,122,204,.2)); }
+    .feat-icon.f3 { background: linear-gradient(135deg, rgba(123,45,139,.4), rgba(200,80,192,.2)); }
+    .feat-icon.f4 { background: linear-gradient(135deg, rgba(230,57,70,.3), rgba(155,35,53,.2)); }
+    .feature-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+    .feature-card p { font-size: 13.5px; color: rgba(255,255,255,.6); line-height: 1.6; }
+
+    /* TESTIMONIALS */
+    .testimonials-section { background: var(--dark); }
+    .testi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
+    .testi-card { padding: 28px; border-radius: 20px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); transition: transform .3s; }
+    .testi-card:hover { transform: translateY(-4px); }
+    .testi-stars { color: var(--yellow); margin-bottom: 12px; font-size: 15px; }
+    .testi-card p { font-size: 14.5px; color: rgba(255,255,255,.8); line-height: 1.7; margin-bottom: 20px; font-style: italic; }
+    .testi-author { display: flex; align-items: center; gap: 14px; }
+    .author-avatar { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: var(--white); }
+    .av1 { background: linear-gradient(135deg,#ff6b35,#ffc300); }
+    .av2 { background: linear-gradient(135deg,#06d6a0,#007acc); }
+    .av3 { background: linear-gradient(135deg,#7b2d8b,#c850c0); }
+    .author-name { font-weight: 700; font-size: 14.5px; }
+    .author-role { font-size: 12px; color: rgba(255,255,255,.5); }
+
+    /* CTA */
+    .cta-section { background: linear-gradient(135deg, var(--orange), #ff8c42, var(--yellow)); padding: 75px 5%; text-align: center; position: relative; overflow: hidden; }
+    .cta-section::before { content: ''; position: absolute; top: -50%; left: -10%; width: 120%; height: 200%; border-radius: 50%; background: rgba(255,255,255,.08); }
+    .cta-section h2 { font-size: clamp(1.8rem,3.2vw,2.6rem); font-weight: 900; color: var(--dark); position: relative; margin-bottom: 14px; }
+    .cta-section p { font-size: 16px; color: rgba(26,26,46,.82); position: relative; margin-bottom: 32px; }
+    .btn-dark { padding: 15px 40px; border-radius: 50px; background: var(--dark); color: var(--white); font-size: 16px; font-weight: 700; border: none; cursor: pointer; transition: all .3s; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,.3); }
+    .btn-dark:hover { transform: translateY(-3px); box-shadow: 0 18px 50px rgba(0,0,0,.45); }
+
+    /* FOOTER */
+    .footer { background: #0d0d1a; padding: 70px 5% 30px; border-top: 1px solid rgba(255,255,255,.06); }
+    .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 50px; }
+    .footer-brand p { color: rgba(255,255,255,.5); font-size: 13.5px; line-height: 1.8; margin: 16px 0 24px; max-width: 280px; }
+    .social-links { display: flex; gap: 12px; }
+    .social-btn { width: 40px; height: 40px; border-radius: 12px; border: 1px solid rgba(255,255,255,.12); display: flex; align-items: center; justify-content: center; font-size: 16px; color: rgba(255,255,255,.6); transition: all .25s; cursor: pointer; background: transparent; }
+    .social-btn:hover { background: var(--orange); border-color: var(--orange); color: var(--white); }
+    .footer-col h4 { font-size: 15px; font-weight: 700; margin-bottom: 18px; color: var(--orange); }
+    .footer-col ul { list-style: none; }
+    .footer-col ul li { margin-bottom: 10px; }
+    .footer-col ul li a { font-size: 13.5px; color: rgba(255,255,255,.55); transition: color .2s; }
+    .footer-col ul li a:hover { color: var(--orange); }
+    .footer-bottom { border-top: 1px solid rgba(255,255,255,.06); padding-top: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .footer-bottom p { font-size: 13px; color: rgba(255,255,255,.4); }
+    .footer-bottom span { color: var(--orange); }
+
+    /* AUTH MODAL */
+    .modal-overlay { position: fixed; inset: 0; z-index: 3000; background: rgba(0,0,0,.75); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .3s; }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal-box {
+      background: linear-gradient(145deg, #1e1e3a, #16213e);
+      border: 1px solid rgba(255,107,53,.25); border-radius: 28px;
+      width: min(480px, 92vw); padding: 44px 40px; position: relative;
+      box-shadow: 0 40px 100px rgba(0,0,0,.65);
+      transform: translateY(30px) scale(.96); transition: transform .35s cubic-bezier(.34,1.56,.64,1);
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    .modal-close { position: absolute; top: 18px; right: 18px; width: 36px; height: 36px; border-radius: 10px; border: none; cursor: pointer; background: rgba(255,255,255,.08); color: rgba(255,255,255,.7); font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+    .modal-close:hover { background: var(--red); color: var(--white); }
+    .modal-logo { text-align: center; margin-bottom: 6px; }
+    .logo-circle { width: 60px; height: 60px; border-radius: 16px; margin: 0 auto 10px; background: linear-gradient(135deg, var(--orange), var(--yellow)); display: flex; align-items: center; justify-content: center; font-size: 26px; box-shadow: 0 8px 25px rgba(255,107,53,.5); }
+    .modal-title { font-size: 23px; font-weight: 800; text-align: center; margin-bottom: 5px; }
+    .modal-sub { text-align: center; font-size: 13.5px; color: rgba(255,255,255,.55); margin-bottom: 28px; }
+    
+    .tab-switcher { display: flex; background: rgba(255,255,255,.06); border-radius: 12px; padding: 4px; margin-bottom: 24px; }
+    .tab-sw-btn { flex: 1; padding: 10px; border-radius: 10px; border: none; cursor: pointer; font-size: 14px; font-weight: 600; transition: all .25s; background: transparent; color: rgba(255,255,255,.55); }
+    .tab-sw-btn.active { background: linear-gradient(135deg, var(--orange), var(--orange2)); color: var(--white); box-shadow: 0 4px 15px rgba(255,107,53,.4); }
+    
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 7px; color: rgba(255,255,255,.8); }
+    .input-wrap { position: relative; }
+    .input-wrap i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,.35); font-size: 15px; }
+    .form-input { width: 100%; padding: 13px 16px 13px 44px; background: rgba(255,255,255,.07); border: 1.5px solid rgba(255,255,255,.1); border-radius: 14px; color: var(--white); font-size: 14.5px; font-family: inherit; outline: none; transition: border-color .25s, background .25s; }
+    .form-input::placeholder { color: rgba(255,255,255,.3); }
+    .form-input:focus { border-color: var(--orange); background: rgba(255,107,53,.06); }
+    .form-input.eye-pad { padding-right: 48px; }
+    .eye-toggle { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; color: rgba(255,255,255,.4); cursor: pointer; font-size: 16px; }
+    
+    .form-options { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; }
+    .remember { display: flex; align-items: center; gap: 8px; font-size: 13px; color: rgba(255,255,255,.6); cursor: pointer; }
+    .remember input { accent-color: var(--orange); width: 16px; height: 16px; cursor: pointer; }
+    .forgot-link { font-size: 13px; color: var(--orange); font-weight: 600; }
+    .forgot-link:hover { opacity: .8; }
+    
+    .submit-btn { width: 100%; padding: 14px; border-radius: 14px; border: none; cursor: pointer; background: linear-gradient(135deg, var(--orange), var(--yellow)); color: var(--dark); font-size: 15.5px; font-weight: 800; letter-spacing: .5px; transition: all .3s; box-shadow: 0 6px 25px rgba(255,107,53,.45); }
+    .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 35px rgba(255,107,53,.6); }
+    
+    .divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,.1); }
+    .divider span { font-size: 12px; color: rgba(255,255,255,.4); white-space: nowrap; }
+    
+    .social-login { display: flex; gap: 12px; }
+    .social-login-btn { flex: 1; padding: 11px; border-radius: 12px; border: 1.5px solid rgba(255,255,255,.12); background: rgba(255,255,255,.05); color: var(--white); font-size: 13.5px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all .25s; }
+    .social-login-btn:hover { border-color: rgba(255,107,53,.5); background: rgba(255,107,53,.08); }
+    
+    .modal-footer-text { text-align: center; margin-top: 20px; font-size: 13px; color: rgba(255,255,255,.5); }
+    .modal-footer-text a { color: var(--orange); font-weight: 600; }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+      .hero { flex-direction: column; text-align: center; gap: 45px; }
+      .hero-stats { justify-content: center; }
+      .hero-buttons { justify-content: center; }
+      .hero-visual { display: none; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+      .nav-links { display: none; }
+    }
+    @media (max-width: 560px) {
+      .footer-grid { grid-template-columns: 1fr; }
+      .modal-box { padding: 32px 20px; }
+      .hero-stats { gap: 20px; }
+    }
+
+    .reveal { opacity: 0; transform: translateY(30px); transition: opacity .6s ease, transform .6s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <a href="#" class="nav-logo">
+    <div class="logo-icon">🍽️</div>
+    <span>Home<em>Bites</em></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#meals">Our Menu</a></li>
+    <li><a href="#features">Why Us</a></li>
+    <li><a href="#reviews">Reviews</a></li>
+  </ul>
+  <div class="nav-actions">
+    <button class="btn-outline" onclick="openModal('login')">Login</button>
+    <button class="btn-primary" onclick="openModal('register')">Sign Up</button>
+    <!-- SIDE DRAWER + BUTTON -->
+    <button class="side-menu-trigger" onclick="openDrawer()" title="More Menu & Account Access">
+      <i class="fa-solid fa-plus"></i>
+    </button>
+  </div>
+</nav>
+
+<!-- SIDE DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer(event)">
+  <div class="side-drawer" id="sideDrawer">
+    <div class="drawer-header">
+      <div class="nav-logo">
+        <div class="logo-icon">🍽️</div>
+        <span style="font-size:18px;">Home<em>Bites</em></span>
+      </div>
+      <button class="drawer-close" onclick="closeDrawer()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <!-- Quick Login card inside side menu -->
+    <div class="drawer-user-card">
+      <div style="font-size:28px;margin-bottom:6px;">👋</div>
+      <h4>Welcome to HomeBites</h4>
+      <p>Hyderabad's trusted home kitchen</p>
+      <div style="display:flex;gap:8px;justify-content:center;">
+        <button class="btn-outline" style="padding:6px 14px;font-size:12px;" onclick="closeDrawer(); openModal('login')">Login</button>
+        <button class="btn-primary" style="padding:6px 14px;font-size:12px;" onclick="closeDrawer(); openModal('register')">Sign Up</button>
+      </div>
+    </div>
+
+    <!-- Full navigation links -->
+    <ul class="drawer-menu-list">
+      <li class="drawer-menu-item">
+        <a href="Customer/menu.html"><i class="fa-solid fa-book-open"></i> Full Daily Menu</a>
+      </li>
+      <li class="drawer-menu-item">
+        <a href="Customer/cart.html"><i class="fa-solid fa-cart-shopping"></i> View Cart & Checkout</a>
+      </li>
+      <li class="drawer-menu-item">
+        <a href="Customer/my-orders.html"><i class="fa-solid fa-clock-rotate-left"></i> My Orders & Tracking</a>
+      </li>
+      <li class="drawer-menu-item">
+        <a href="Customer/address.html"><i class="fa-solid fa-location-dot"></i> Manage Addresses</a>
+      </li>
+      <li class="drawer-menu-item">
+        <a href="Customer/profile.html"><i class="fa-solid fa-user"></i> My Profile</a>
+      </li>
+    </ul>
+
+    <div style="margin-top:auto;padding-top:20px;font-size:12px;color:rgba(255,255,255,.4);text-align:center;">
+      📍 1 Branch · Hyderabad Only<br/>Delivery within 12 km
+    </div>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-content reveal">
+    <div class="hero-badge">
+      <i class="fa-solid fa-location-dot"></i> Hyderabad Kitchen &nbsp;·&nbsp; 
+      <i class="fa-solid fa-route"></i> Delivering within 12 km
+    </div>
+    <h1>Authentic <span class="highlight">Home Cooked</span><br/>Meals in Hyderabad</h1>
+    <p>Craving nutritious, homely flavours? Cooked fresh with pure spices and zero preservatives by our dedicated home kitchen in Hyderabad.</p>
+    
+    <div class="branch-pill">
+      <span style="font-size:20px;">📍</span>
+      <span><strong>Kitchen Base: Madhapur, Hyderabad</strong> · 12 km Quick Delivery Zone</span>
+    </div>
+
+    <div class="hero-buttons">
+      <button class="btn-big primary" onclick="openModal('register')">
+        <i class="fa-solid fa-utensils"></i> Order Now
+      </button>
+      <button class="btn-big secondary" onclick="document.getElementById('meals').scrollIntoView({behavior:'smooth'})">
+        <i class="fa-solid fa-bowl-food"></i> Explore Menu
+      </button>
+    </div>
+
+    <div class="hero-stats">
+      <div class="stat-item"><span class="num">500+</span><span class="lbl">Hyderabad Customers</span></div>
+      <div class="stat-item"><span class="num">12 km</span><span class="lbl">Delivery Radius</span></div>
+      <div class="stat-item"><span class="num">30-40m</span><span class="lbl">Avg. Arrival Time</span></div>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <div class="hub-card">
+      <div class="hub-badge">
+        <span class="pulse-dot"></span> Kitchen Active & Dispatched
+      </div>
+      <div class="hub-title">HomeBites Central Kitchen</div>
+      <div class="hub-loc">
+        <i class="fa-solid fa-location-dot"></i> Plot 42, Hitech City Road, Madhapur, Hyderabad
+      </div>
+
+      <div class="hub-metrics">
+        <div class="metric-box">
+          <div class="metric-val">12 km</div>
+          <div class="metric-lbl">Max Delivery Radius</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-val">30–40 min</div>
+          <div class="metric-lbl">Avg. Delivery Time</div>
+        </div>
+      </div>
+
+      <div class="hub-coverage-title">
+        <span>Prime Delivery Areas</span>
+        <span>100% Homestyle</span>
+      </div>
+
+      <div class="coverage-tags">
+        <span class="cov-tag"><i class="fa-solid fa-circle-check"></i> Madhapur</span>
+        <span class="cov-tag"><i class="fa-solid fa-circle-check"></i> Hitech City</span>
+        <span class="cov-tag"><i class="fa-solid fa-circle-check"></i> Gachibowli</span>
+        <span class="cov-tag"><i class="fa-solid fa-circle-check"></i> Jubilee Hills</span>
+        <span class="cov-tag"><i class="fa-solid fa-circle-check"></i> Banjara Hills</span>
+        <span class="cov-tag"><i class="fa-solid fa-circle-check"></i> Kondapur</span>
+        <span class="cov-tag"><i class="fa-solid fa-circle-check"></i> KPHB Colony</span>
+        <span class="cov-tag"><i class="fa-solid fa-circle-check"></i> Kukatpally</span>
+      </div>
+
+      <button class="hub-btn" onclick="openModal('register')">
+        <i class="fa-solid fa-bowl-rice"></i> Order Fresh Homemade Food
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-section" id="how">
+  <div class="section-head reveal">
+    <div class="section-label">Process</div>
+    <h2 class="section-title">How HomeBites Works</h2>
+    <p class="section-sub">Simple, clean, and delivered hot to your doorstep in Hyderabad.</p>
+  </div>
+  <div class="steps-grid">
+    <div class="step-card reveal"><div class="step-num">1</div><div class="step-icon s1">📝</div><h3>Create Account</h3><p>Sign up in seconds with your phone number or email for instant access.</p></div>
+    <div class="step-card reveal"><div class="step-num">2</div><div class="step-icon s2">🔍</div><h3>Browse Menu</h3><p>Select from authentic Veg curries, Non-Veg specials, Thalis, and Snacks.</p></div>
+    <div class="step-card reveal"><div class="step-num">3</div><div class="step-icon s3">🛒</div><h3>Place Order</h3><p>Choose your delivery location within our 12 km delivery range in Hyderabad.</p></div>
+    <div class="step-card reveal"><div class="step-num">4</div><div class="step-icon s4">🚀</div><h3>Enjoy Delivery</h3><p>Hot, homemade food arrives packed hygienically within 30–40 minutes.</p></div>
+  </div>
+</section>
+
+<!-- MENU SECTION -->
+<section class="meals-section" id="meals">
+  <div class="section-head reveal" style="margin-bottom:28px;">
+    <div class="section-label">Today's Kitchen Menu</div>
+    <h2 class="section-title">Fresh Everyday Homemade Specials 🍽️</h2>
+    <p class="section-sub">Cooked fresh daily with locally sourced ingredients. Select category to filter.</p>
+  </div>
+
+  <!-- Delivery info banner -->
+  <div class="menu-info-bar reveal">
+    <div class="icon">🛵</div>
+    <div>
+      <div class="title">Delivering in Hyderabad · Up to 12 km Range</div>
+      <div class="desc">Free delivery on orders above ₹300. Flat ₹40 delivery charge for others within 12 km.</div>
+    </div>
+  </div>
+
+  <!-- Filter tabs -->
+  <div class="filter-tabs reveal">
+    <button class="tab-btn active" onclick="filterMeals('all', this)">🍽️ All (12)</button>
+    <button class="tab-btn" onclick="filterMeals('veg', this)">🥗 Veg (3)</button>
+    <button class="tab-btn" onclick="filterMeals('nonveg', this)">🍗 Non-Veg (3)</button>
+    <button class="tab-btn" onclick="filterMeals('thali', this)">🍱 Thali (3)</button>
+    <button class="tab-btn" onclick="filterMeals('snacks', this)">🥪 Snacks (3)</button>
+  </div>
+
+  <!-- Meals Grid: Exactly 3 items per category -->
+  <div class="meals-grid" id="mealsGrid">
+    <!-- VEG 1 -->
+    <div class="meal-card reveal" data-category="veg">
+      <div class="meal-thumb">
+        <span class="veg-tag veg">🟢 Veg</span>
+        <img src="https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=600&q=80" alt="Dal Tadka + Jeera Rice" loading="lazy" />
+      </div>
+      <div class="meal-info">
+        <h3>Dal Tadka + Jeera Rice</h3>
+        <div class="meal-meta">
+          <span class="stars">⭐ 4.8</span>
+          <span><i class="fa-regular fa-clock"></i> 20 mins</span>
+          <span><i class="fa-solid fa-fire-flame-curved"></i> 410 kcal</span>
+        </div>
+        <p class="meal-desc">Yellow dal with aromatic cumin tempering, basmati rice, papad, and fresh pickle.</p>
+        <div class="meal-footer">
+          <div class="meal-price">₹120 <del>₹150</del></div>
+          <button class="cart-btn" onclick="openModal('register')"><i class="fa-solid fa-plus"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- VEG 2 -->
+    <div class="meal-card reveal" data-category="veg">
+      <div class="meal-thumb">
+        <span class="veg-tag veg">🟢 Veg</span>
+        <img src="https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=600&q=80" alt="Paneer Butter Masala" loading="lazy" />
+      </div>
+      <div class="meal-info">
+        <h3>Paneer Butter Masala</h3>
+        <div class="meal-meta">
+          <span class="stars">⭐ 4.9</span>
+          <span><i class="fa-regular fa-clock"></i> 22 mins</span>
+          <span><i class="fa-solid fa-fire-flame-curved"></i> 480 kcal</span>
+        </div>
+        <p class="meal-desc">Tender paneer cubes simmered in rich creamy tomato gravy, served with 3 soft phulkas.</p>
+        <div class="meal-footer">
+          <div class="meal-price">₹160 <del>₹200</del></div>
+          <button class="cart-btn" onclick="openModal('register')"><i class="fa-solid fa-plus"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- VEG 3 -->
+    <div class="meal-card reveal" data-category="veg">
+      <div class="meal-thumb">
+        <span class="veg-tag veg">🟢 Veg</span>
+        <img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4f/Aloo_Mattar.jpg/960px-Aloo_Mattar.jpg" alt="Aloo Gobi Matar Curry" loading="lazy" />
+      </div>
+      <div class="meal-info">
+        <h3>Aloo Gobi Matar Curry</h3>
+        <div class="meal-meta">
+          <span class="stars">⭐ 4.7</span>
+          <span><i class="fa-regular fa-clock"></i> 18 mins</span>
+          <span><i class="fa-solid fa-fire-flame-curved"></i> 360 kcal</span>
+        </div>
+        <p class="meal-desc">Homestyle comforting dry curry with potatoes, cauliflower, and green peas with 3 rotis.</p>
+        <div class="meal-footer">
+          <div class="meal-price">₹110 <del>₹140</del></div>
+          <button class="cart-btn" onclick="openModal('register')"><i class="fa-solid fa-plus"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- NON-VEG 1 -->
+    <div class="meal-card reveal" data-category="nonveg">
+      <div class="meal-thumb">
+        <span class="veg-tag nonveg">🔴 Non-Veg</span>
+        <img src="https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=600&q=80" alt="Hyderabadi Chicken Dum Biryani" loading="lazy" />
+      </div>
+      <div class="meal-info">
+        <h3>Hyderabadi Chicken Dum Biryani</h3>
+        <div class="meal-meta">
+          <span class="stars">⭐ 5.0</span>
+          <span><i class="fa-regular fa-clock"></i> 30 mins</span>
+          <span><i class="fa-solid fa-fire-flame-curved"></i> 680 kcal</span>
+        </div>
+        <p class="meal-desc">Layered fragrant basmati rice with marinated spiced chicken, mirchi ka salan, and raita.</p>
+        <div class="meal-footer">
+          <div class="meal-price">₹200 <del>₹250</del></div>
+          <button class="cart-btn" onclick="openModal('register')"><i class="fa-solid fa-plus"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- NON-VEG 2 -->
+    <div class="meal-card reveal" data-category="nonveg">
+      <div class="meal-thumb">
+        <span class="veg-tag nonveg">🔴 Non-Veg</span>
+        <img src="https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?auto=format&fit=crop&w=600&q=80" alt="Telangana Country Chicken Curry" loading="lazy" />
+      </div>
+      <div class="meal-info">
+        <h3>Telangana Country Chicken Curry</h3>
+        <div class="meal-meta">
+          <span class="stars">⭐ 4.9</span>
+          <span><i class="fa-regular fa-clock"></i> 28 mins</span>
+          <span><i class="fa-solid fa-fire-flame-curved"></i> 560 kcal</span>
+        </div>
+        <p class="meal-desc">Spicy regional homestyle chicken curry with hand-ground masalas and steamed rice.</p>
+        <div class="meal-footer">
+          <div class="meal-price">₹190 <del>₹240</del></div>
+          <button class="cart-btn" onclick="openModal('register')"><i class="fa-solid fa-plus"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- NON-VEG 3 -->
+    <div class="meal-card reveal" data-category="nonveg">
+      <div class="meal-thumb">
+        <span class="veg-tag nonveg">🔴 Non-Veg</span>
+        <img src="https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=600&q=80" alt="Egg Masala Roast + Parotta" loading="lazy" />
+      </div>
+      <div class="meal-info">
+        <h3>Egg Masala Roast + Parotta</h3>
+        <div class="meal-meta">
+          <span class="stars">⭐ 4.8</span>
+          <span><i class="fa-regular fa-clock"></i> 20 mins</span>
+          <span><i class="fa-solid fa-fire-flame-curved"></i> 490 kcal</span>
+        </div>
+        <p class="meal-desc">2 hard-boiled eggs tossed in thick spicy onion-tomato gravy with 2 flaky Malabar parottas.</p>
+        <div class="meal-footer">
+          <div class="meal-price">₹130 <del>₹160</del></div>
+          <button class="cart-btn" onclick="openModal('register')"><i class="fa-solid fa-plus"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- THALI 1 -->
+    <div class="meal-card reveal" data-category="thali">
+      <div class="meal-thumb">
+        <span class="veg-tag veg">🟢 Veg</span>
+        <img src="https://images.unsplash.com/photo-1610057099443-fde8c4d50f91?auto=format&fit=crop&w=600&q=80" alt="South Indian Veg Bhojanam" loading="lazy" />
+      </div>
+      <div class="meal-info">
+        <h3>South Indian Veg Bhojanam</h3>
+        <div class="meal-meta">
+          <span class="stars">⭐ 4.9</span>
+          <span><i class="fa-regular fa-clock"></i> 22 mins</span>
+          <span><i class="fa-solid fa-fire-flame-curved"></i> 580 kcal</span>
+        </div>
+        <p class="meal-desc">Steamed rice, sambar, rasam, kootu, poriyal, curd, papad, pickle, and sweet vermicelli payasam.</p>
+        <div class="meal-footer">
+          <div class="meal-price">₹150 <del>₹180</del></div>
+          <button class="cart-btn" onclick="openModal('register')"><i class="fa-solid fa-plus"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- THALI 2 -->
+    <div class="meal-card reveal" data-category="thali">
+      <div class="meal-thumb">
+        <span class="veg-tag veg">🟢 Veg</span>
+        <img src="https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?auto=format&fit=crop&w=600&q=80" alt="North Indian Deluxe Veg Thali" loading="lazy" />
+      </div>
+      <div class="meal-info">
+        <h3>North Indian Deluxe Veg Thali</h3>
+        <div class="meal-meta">
+          <span class="stars">⭐ 4.8</span>
+          <span><i class="fa-regular fa-clock"></i> 25 mins</span>
+          <span><i class="fa-solid fa-fire-flame-curved"></i> 640 kcal</span>
+        </div>
+        <p class="meal-desc">Paneer butter masala, yellow dal fry, seasonal sabzi, jeera rice, 3 butter rotis, salad & gulab jamun.</p>
+        <div class="meal-footer">
+          <div class="meal-price">₹170 <del>₹210</del></div>
+          <button class="cart-btn" onclick="openModal('register')"><i class="fa-solid fa-plus"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- THALI 3 -->
+    <div class="meal-card reveal" data-category="thali">
+      <div class="meal-thumb">
+        <span class="veg-tag nonveg">🔴 Non-Veg</span>
+        <img src="https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=600&q=80" alt="Royal Chicken Curry Thali" loading="lazy" />
+      </div>
+      <div class="meal-info">
+        <h3>Royal Chicken Curry Thali</h3>
+        <div class="meal-meta">
+          <span class="stars">⭐ 5.0</span>
+          <span><i class="fa-regular fa-clock"></i> 26 mins</span>
+          <span><i class="fa-solid fa-fire-flame-curved"></i> 720 kcal</span>
+        </div>
+        <p class="meal-desc">Homestyle chicken curry, dal fry, flavored rice, 2 rotis, boiled egg, onion salad & sweet.</p>
+        <div class="meal-footer">
+          <div class="meal-price">₹210 <del>₹260</del></div>
+          <button class="cart-btn" onclick="openModal('register')"><i class="fa-solid fa-plus"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SNACKS 1 -->
+    <div class="meal-card reveal" data-category="snacks">
+      <div class="meal-thumb">
+        <span class="veg-tag veg">🟢 Veg</span>
+        <img src="https://images.unsplash.com/photo-1626132647523-66f5bf380027?auto=format&fit=crop&w=600&q=80" alt="Amritsari Chole Bhature" loading="lazy" />
+      </div>
+      <div class="meal-info">
+        <h3>Amritsari Chole Bhature</h3>
+        <div class="meal-meta">
+          <span class="stars">⭐ 4.8</span>
+          <span><i class="fa-regular fa-clock"></i> 15 mins</span>
+          <span><i class="fa-solid fa-fire-flame-curved"></i> 580 kcal</span>
+        </div>
+        <p class="meal-desc">2 fluffy fried bhature with spiced tangy chickpea masala, pickled chillies, and raw onion rings.</p>
+        <div class="meal-footer">
+          <div class="meal-price">₹100 <del>₹130</del></div>
+          <button class="cart-btn" onclick="openModal('register')"><i class="fa-solid fa-plus"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SNACKS 2 -->
+    <div class="meal-card reveal" data-category="snacks">
+      <div class="meal-thumb">
+        <span class="veg-tag veg">🟢 Veg</span>
+        <img src="https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=600&q=80" alt="Crispy Veg Samosa" loading="lazy" />
+      </div>
+      <div class="meal-info">
+        <h3>Crispy Veg Samosa (3 pcs)</h3>
+        <div class="meal-meta">
+          <span class="stars">⭐ 4.7</span>
+          <span><i class="fa-regular fa-clock"></i> 10 mins</span>
+          <span><i class="fa-solid fa-fire-flame-curved"></i> 340 kcal</span>
+        </div>
+        <p class="meal-desc">Golden crisp pastry cones stuffed with spiced potatoes and green peas, with mint & tamarind chutneys.</p>
+        <div class="meal-footer">
+          <div class="meal-price">₹60 <del>₹80</del></div>
+          <button class="cart-btn" onclick="openModal('register')"><i class="fa-solid fa-plus"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SNACKS 3 -->
+    <div class="meal-card reveal" data-category="snacks">
+      <div class="meal-thumb">
+        <span class="veg-tag veg">🟢 Veg</span>
+        <img src="https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=600&q=80" alt="Paneer Tikka Grilled Sandwich" loading="lazy" />
+      </div>
+      <div class="meal-info">
+        <h3>Paneer Tikka Grilled Sandwich</h3>
+        <div class="meal-meta">
+          <span class="stars">⭐ 4.8</span>
+          <span><i class="fa-regular fa-clock"></i> 12 mins</span>
+          <span><i class="fa-solid fa-fire-flame-curved"></i> 420 kcal</span>
+        </div>
+        <p class="meal-desc">Toasted whole wheat bread loaded with spiced paneer cubes, crunchy bell peppers, and cheese.</p>
+        <div class="meal-footer">
+          <div class="meal-price">₹90 <del>₹120</del></div>
+          <button class="cart-btn" onclick="openModal('register')"><i class="fa-solid fa-plus"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Big Callout to access full menu & side drawer -->
+  <div class="more-menu-bar reveal">
+    <a href="Customer/menu.html" class="btn-more-menu" style="text-decoration:none;">
+      <i class="fa-solid fa-utensils"></i> Explore All 70+ Homemade Dishes in Full Menu →
+    </a>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features-section" id="features">
+  <div class="section-head reveal">
+    <div class="section-label">Why HomeBites</div>
+    <h2 class="section-title">The HomeBites Promise</h2>
+    <p class="section-sub">Hyderabad's pure home kitchen food prepared with unconditional care.</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card reveal">
+      <div class="feat-icon f1">🏠</div>
+      <h3>100% Home Cooked</h3>
+      <p>Prepared in small batches using pure sunflower oil and premium ingredients — never hotel grease.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feat-icon f2">⚡</div>
+      <h3>30–45 Min Delivery</h3>
+      <p>Dedicated riders ensuring your lunch or dinner arrives steaming hot within our 12 km delivery radius.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feat-icon f3">💳</div>
+      <h3>UPI & COD Available</h3>
+      <p>Pay smoothly through Google Pay, PhonePe, Cards, or Cash on Delivery right at your doorstep.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feat-icon f4">🛡️</div>
+      <h3>100% Satisfaction</h3>
+      <p>Unhappy with the taste or packing? We replace or refund immediately. No questions asked.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS (FROM HYDERABAD ONLY) -->
+<section class="testimonials-section" id="reviews">
+  <div class="section-head reveal">
+    <div class="section-label">Hyderabad Customer Love</div>
+    <h2 class="section-title">Loved by Foodies Across Hyderabad ❤️</h2>
+    <p class="section-sub">Real reviews from our regular customers in Hyderabad.</p>
+  </div>
+  <div class="testi-grid">
+    <div class="testi-card reveal">
+      <div class="testi-stars">★★★★★</div>
+      <p>"The Hyderabadi Dum Biryani is spot on! Authentic spices, tender chicken, and not swimming in oil like restaurant food. Ordering thrice a week to my office in HITEC City!"</p>
+      <div class="testi-author">
+        <div class="author-avatar av1">P</div>
+        <div>
+          <div class="author-name">Pranathi Rao</div>
+          <div class="author-role">HITEC City, Hyderabad</div>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card reveal">
+      <div class="testi-stars">★★★★★</div>
+      <p>"Living alone in Gachibowli, I was missing mother's food badly. HomeBites South Indian Thali and Dal Tadka are a blessing. Packing is totally spill-proof and neat."</p>
+      <div class="testi-author">
+        <div class="author-avatar av2">R</div>
+        <div>
+          <div class="author-name">Rohit Varma</div>
+          <div class="author-role">Gachibowli, Hyderabad</div>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card reveal">
+      <div class="testi-stars">★★★★★</div>
+      <p>"Ordered Paneer Butter Masala and Chole Bhature for Sunday family lunch. Everyone loved it! Delivered in 25 minutes hot and fresh in Madhapur."</p>
+      <div class="testi-author">
+        <div class="author-avatar av3">A</div>
+        <div>
+          <div class="author-name">Ananya Reddy</div>
+          <div class="author-role">Madhapur, Hyderabad</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <h2>Hungry? Taste True Hyderabad Home Cooking 🍽️</h2>
+  <p>Fresh meals ready to be dispatched within 12 km. Sign up today and get ₹50 off your first meal!</p>
+  <button class="btn-dark" onclick="openModal('register')">
+    <i class="fa-solid fa-bolt"></i>&nbsp; Order Your Meal Now
+  </button>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="nav-logo" style="margin-bottom:0">
+        <div class="logo-icon">🍽️</div>
+        <span style="font-size:20px;font-weight:800;">Home<em style="font-style:normal;color:var(--orange)">Bites</em></span>
+      </div>
+      <p>Bringing authentic, healthy, and hygienic home-cooked meals across Hyderabad. Freshly made every morning.</p>
+      <div class="social-links">
+        <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" class="social-btn" title="Follow us on Instagram"><i class="fa-brands fa-instagram"></i></a>
+        <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" class="social-btn" title="Follow us on Facebook"><i class="fa-brands fa-facebook"></i></a>
+        <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" class="social-btn" title="Chat with us on WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Quick Links</h4>
+      <ul>
+        <li><a href="#home">Home</a></li>
+        <li><a href="Customer/menu.html">Our Menu</a></li>
+        <li><a href="#how">How It Works</a></li>
+        <li><a href="#features">Why Us</a></li>
+        <li><a href="#reviews">Customer Reviews</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Customer Area</h4>
+      <ul>
+        <li><a href="Customer/register.html">Sign Up Free</a></li>
+        <li><a href="Customer/login.html">Customer Login</a></li>
+        <li><a href="Customer/menu.html">View Full Menu</a></li>
+        <li><a href="Customer/my-orders.html">My Orders & Tracking</a></li>
+        <li><a href="Customer/address.html">Manage Addresses</a></li>
+        <li><a href="Admin/login.html" style="color:var(--orange);">Admin Portal ⚙️</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Hyderabad Service</h4>
+      <ul>
+        <li><a href="#home">Central Kitchen (Madhapur)</a></li>
+        <li><a href="Customer/address.html">12 km Delivery Coverage Map</a></li>
+        <li><a href="#features">Hygienic Home Cooking</a></li>
+        <li><a href="https://wa.me/919876543210" target="_blank">WhatsApp Helpdesk</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 <span>HomeBites</span>. Authentic home-cooked food delivered across Hyderabad (12 km zone).</p>
+    <p>🔒 100% Safe & Hygienic &nbsp;|&nbsp; ⚡ 30–40 Mins Delivery &nbsp;|&nbsp; ⭐ 4.9 Hyderabad Rating</p>
+  </div>
+</footer>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="authModal" onclick="closeOnOverlay(event)">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+    <div class="modal-logo"><div class="logo-circle">🍽️</div></div>
+    <div class="modal-title" id="modalTitle">Welcome Back!</div>
+    <div class="modal-sub" id="modalSub">Login to order your favourite Hyderabad home meals.</div>
+    <div class="tab-switcher">
+      <button class="tab-sw-btn active" id="loginTab" onclick="switchTab('login')">Login</button>
+      <button class="tab-sw-btn" id="registerTab" onclick="switchTab('register')">Sign Up</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <form id="loginForm" onsubmit="handleLoginModal(event)">
+      <div class="form-group">
+        <label>Gmail or Mobile (+91)</label>
+        <div class="input-wrap">
+          <i class="fa-solid fa-envelope"></i>
+          <input type="text" class="form-input" id="modalLoginId" placeholder="user@gmail.com or +919876543210" required />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="input-wrap">
+          <i class="fa-solid fa-lock"></i>
+          <input type="password" class="form-input eye-pad" id="loginPwd" placeholder="Enter your password" required />
+          <button type="button" class="eye-toggle" onclick="togglePwd('loginPwd',this)"><i class="fa-regular fa-eye"></i></button>
+        </div>
+      </div>
+      <div class="form-options">
+        <label class="remember"><input type="checkbox" /> Remember me</label>
+        <a href="Customer/forgot-password.html" class="forgot-link">Forgot password?</a>
+      </div>
+      <button type="submit" class="submit-btn" id="modalLoginBtn"><i class="fa-solid fa-arrow-right-to-bracket"></i>&nbsp; Login to HomeBites</button>
+    </form>
+
+    <!-- REGISTER FORM -->
+    <form id="registerForm" style="display:none;" onsubmit="handleRegisterModal(event)">
+      <div class="form-group">
+        <label>Full Name</label>
+        <div class="input-wrap">
+          <i class="fa-solid fa-user"></i>
+          <input type="text" class="form-input" id="modalRegName" placeholder="Your full name" required />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <div class="input-wrap">
+          <i class="fa-solid fa-envelope"></i>
+          <input type="email" class="form-input" id="modalRegEmail" placeholder="yourname@gmail.com" required />
+        </div>
+        <div style="font-size:11px;color:var(--yellow);margin-top:4px;">⚠️ Must end with @gmail.com</div>
+      </div>
+      <div class="form-group">
+        <label>Mobile Number (+91)</label>
+        <div class="input-wrap">
+          <i class="fa-solid fa-phone"></i>
+          <input type="tel" class="form-input" id="modalRegMobile" placeholder="+919876543210" required />
+        </div>
+        <div style="font-size:11px;color:var(--yellow);margin-top:4px;">⚠️ Must start with +91 followed by 10 digits</div>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="input-wrap">
+          <i class="fa-solid fa-lock"></i>
+          <input type="password" class="form-input eye-pad" id="regPwd" placeholder="Min. 8 characters" required />
+          <button type="button" class="eye-toggle" onclick="togglePwd('regPwd',this)"><i class="fa-regular fa-eye"></i></button>
+        </div>
+      </div>
+      <button type="submit" class="submit-btn" id="modalRegBtn"><i class="fa-solid fa-user-plus"></i>&nbsp; Create My Account</button>
+      <p style="font-size:12px;color:rgba(255,255,255,.4);text-align:center;margin-top:12px;">By signing up you agree to our <a href="#" style="color:var(--orange)">Terms</a> and <a href="#" style="color:var(--orange)">Privacy Policy</a>.</p>
+    </form>
+
+    <div class="modal-footer-text" id="modalSwitch">Don't have an account? <a href="#" onclick="switchTab('register')">Sign up free →</a></div>
+  </div>
+</div>
+
+<script src="Scripts/auth.js"></script>
+<script>
+  // Navbar scroll effect
+  window.addEventListener('scroll', () => {
+    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 40);
+  });
+
+  // Reveal animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Category filter functionality (Veg, Non-Veg, Thali, Snacks)
+  function filterMeals(category, btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const cards = document.querySelectorAll('.meals-grid .meal-card');
+    cards.forEach(card => {
+      if (category === 'all' || card.getAttribute('data-category') === category) {
+        card.style.display = 'flex';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  }
+
+  // Side Drawer Open / Close
+  function openDrawer() {
+    document.getElementById('drawerOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeDrawer(e) {
+    if (!e || e.target === document.getElementById('drawerOverlay') || e.target.closest('.drawer-close')) {
+      document.getElementById('drawerOverlay').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  }
+
+  // Auth Modal Open / Close
+  function openModal(tab) {
+    document.getElementById('authModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    switchTab(tab || 'login');
+  }
+  function closeModal() {
+    document.getElementById('authModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  function closeOnOverlay(e) {
+    if (e.target === document.getElementById('authModal')) closeModal();
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      closeModal();
+      closeDrawer();
+    }
+  });
+
+  // Switch Login / Register Tabs
+  function switchTab(tab) {
+    const isLogin = tab === 'login';
+    document.getElementById('loginForm').style.display = isLogin ? 'block' : 'none';
+    document.getElementById('registerForm').style.display = isLogin ? 'none' : 'block';
+    document.getElementById('loginTab').classList.toggle('active', isLogin);
+    document.getElementById('registerTab').classList.toggle('active', !isLogin);
+    document.getElementById('modalTitle').textContent = isLogin ? 'Welcome Back!' : 'Create Account';
+    document.getElementById('modalSub').textContent = isLogin
+      ? 'Login to order your favourite Hyderabad home meals.'
+      : 'Join Hyderabad food lovers enjoying fresh home meals.';
+    document.getElementById('modalSwitch').innerHTML = isLogin
+      ? `Don't have an account? <a href="#" onclick="switchTab('register')">Sign up free →</a>`
+      : `Already have an account? <a href="#" onclick="switchTab('login')">Login →</a>`;
+  }
+
+  // Password visibility toggle
+  function togglePwd(id, btn) {
+    const inp = document.getElementById(id);
+    const isText = inp.type === 'text';
+    inp.type = isText ? 'password' : 'text';
+    btn.innerHTML = isText ? '<i class="fa-regular fa-eye"></i>' : '<i class="fa-regular fa-eye-slash"></i>';
+  }
+
+  // Database-backed registration from homepage modal
+  async function handleRegisterModal(e) {
+    e.preventDefault();
+    const btn = document.getElementById('modalRegBtn');
+    const fullName = document.getElementById('modalRegName').value.trim();
+    const rawEmail = document.getElementById('modalRegEmail').value.trim();
+    const rawMobile = document.getElementById('modalRegMobile').value.trim();
+    const password = document.getElementById('regPwd').value;
+
+    const emailCheck = Homebites.validateGmail(rawEmail);
+    if (!emailCheck.valid) {
+      Homebites.showToast(emailCheck.message, true);
+      return;
+    }
+
+    const mobileCheck = Homebites.validateMobile(rawMobile);
+    if (!mobileCheck.valid) {
+      Homebites.showToast(mobileCheck.message, true);
+      return;
+    }
+
+    if (password.length < 8) {
+      Homebites.showToast('Password must be at least 8 characters.', true);
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating Account...';
+
+    try {
+      const response = await fetch(`${API_BASE}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName,
+          email: emailCheck.email,
+          mobile: mobileCheck.mobile,
+          password
+        })
+      });
+
+      const data = await response.json();
+      if (response.ok && data.success) {
+        console.info('[OTP] Registration OTP:', data.otp);
+        localStorage.removeItem('homebites_user');
+        localStorage.setItem('homebites_pending_user', JSON.stringify(data.user));
+        localStorage.setItem('homebites_pending_email', emailCheck.email);
+        localStorage.setItem('homebites_pending_mobile', mobileCheck.mobile);
+        localStorage.setItem('homebites_pending_otp', data.otp);
+
+        Homebites.showToast('✅ Account created successfully! Redirecting to OTP verification...');
+        closeModal();
+        setTimeout(() => {
+          window.location.href = `Customer/otp.html?email=${encodeURIComponent(emailCheck.email)}`;
+        }, 1000);
+      } else {
+        Homebites.showToast(data.message || (data.errors && data.errors[0]) || 'Registration failed.', true);
+      }
+    } catch (err) {
+      Homebites.showToast('Could not reach Backend server at localhost:5000.', true);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-user-plus"></i>&nbsp; Create My Account';
+    }
+  }
+
+  // Database-backed login from homepage modal
+  async function handleLoginModal(e) {
+    e.preventDefault();
+    const btn = document.getElementById('modalLoginBtn');
+    const identifier = document.getElementById('modalLoginId').value.trim();
+    const password = document.getElementById('loginPwd').value;
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Logging in...';
+
+    try {
+      const response = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier, password })
+      });
+
+      const data = await response.json();
+      if (response.ok && data.success) {
+        Homebites.setUser(data.user);
+        Homebites.showToast(`Welcome back, ${data.user.fullName}!`);
+        closeModal();
+        setTimeout(() => {
+          window.location.href = 'Customer/menu.html';
+        }, 1000);
+      } else {
+        Homebites.showToast(data.message || 'Invalid credentials.', true);
+      }
+    } catch (err) {
+      Homebites.showToast('Could not reach Backend server at localhost:5000.', true);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-arrow-right-to-bracket"></i>&nbsp; Login to HomeBites';
+    }
+  }
+</script>
+</body>
+</html>
+

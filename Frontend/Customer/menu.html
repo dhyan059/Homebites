@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Full Menu - HomeBites Hyderabad</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--orange:#FF6B35;--yellow:#FFC300;--red:#E63946;--green:#06D6A0;--dark:#1A1A2E;--dark2:#16213E;--white:#FFFFFF}
+    body{font-family:'Poppins',sans-serif;background:var(--dark);color:var(--white);padding-bottom:80px}
+    a{text-decoration:none;color:inherit}
+    .header{background:rgba(26,26,46,.97);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,107,53,.22);padding:14px 5%;position:sticky;top:0;z-index:200;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .logo-box{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px}
+    .logo-box span em{font-style:normal;color:var(--orange)}
+    .header-actions{display:flex;align-items:center;gap:12px}
+    .cart-btn-nav{background:linear-gradient(135deg,var(--orange),var(--yellow));color:var(--dark);padding:8px 18px;border-radius:50px;font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:8px;cursor:pointer}
+    .cart-count-badge{background:var(--dark);color:var(--white);border-radius:50%;padding:2px 7px;font-size:11px;font-weight:800}
+    .container{max-width:1200px;margin:30px auto;padding:0 20px}
+    .menu-hero{text-align:center;margin-bottom:28px}
+    .menu-hero h1{font-size:30px;font-weight:800;margin-bottom:6px}
+    .menu-hero p{font-size:14px;color:rgba(255,255,255,.6)}
+    .search-wrap{position:relative;max-width:520px;margin:0 auto 26px}
+    .search-wrap input{width:100%;padding:13px 18px 13px 46px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.14);border-radius:50px;color:var(--white);font-size:14px;font-family:inherit;outline:none;transition:border-color .2s}
+    .search-wrap input::placeholder{color:rgba(255,255,255,.42)}
+    .search-wrap input:focus{border-color:var(--orange)}
+    .search-wrap i{position:absolute;left:17px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,.4);font-size:15px}
+    .filter-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px;margin-bottom:26px}
+    .cat-btn{padding:8px 20px;border-radius:50px;border:1.5px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.8);cursor:pointer;font-weight:600;font-size:13px;font-family:inherit;transition:all .22s}
+    .cat-btn.active,.cat-btn:hover{background:var(--orange);border-color:var(--orange);color:var(--white)}
+    .veg-toggle-wrap{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;margin-left:8px}
+    .veg-toggle-wrap input[type=checkbox]{display:none}
+    .veg-toggle-label{display:flex;align-items:center;gap:7px;cursor:pointer;padding:8px 16px;border-radius:50px;border:1.5px solid rgba(6,214,160,.35);background:rgba(6,214,160,.08);color:rgba(255,255,255,.8);transition:all .22s;font-size:13px;font-weight:600}
+    .veg-toggle-wrap input:checked+.veg-toggle-label{background:var(--green);border-color:var(--green);color:var(--dark)}
+    .results-bar{font-size:13px;color:rgba(255,255,255,.5);margin-bottom:22px;text-align:center}
+    .results-bar strong{color:var(--orange)}
+    .meals-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:24px}
+    .meal-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;transition:transform .25s,box-shadow .25s}
+    .meal-card:hover{transform:translateY(-5px);box-shadow:0 15px 40px rgba(255,107,53,.22)}
+    .meal-thumb{height:188px;width:100%;position:relative;overflow:hidden;background:#16213E}
+    .meal-thumb img{width:100%;height:100%;object-fit:cover;transition:transform .3s ease}
+    .meal-card:hover .meal-thumb img{transform:scale(1.08)}
+    .veg-pill{position:absolute;top:12px;left:12px;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;z-index:5;box-shadow:0 4px 10px rgba(0,0,0,.3)}
+    .veg-pill.veg{background:var(--green);color:var(--dark)}
+    .veg-pill.nonveg{background:var(--red);color:var(--white)}
+    .prep-time{position:absolute;bottom:10px;right:10px;font-size:11px;font-weight:600;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);padding:3px 8px;border-radius:8px}
+    .cat-chip{position:absolute;top:12px;right:12px;font-size:10.5px;font-weight:700;background:rgba(26,26,46,.85);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.75);padding:3px 9px;border-radius:12px}
+    .meal-body{padding:18px;flex:1;display:flex;flex-direction:column}
+    .meal-body h3{font-size:15.5px;font-weight:700;margin-bottom:5px;line-height:1.35}
+    .meal-desc{font-size:12.5px;color:rgba(255,255,255,.52);line-height:1.55;margin-bottom:14px;flex:1}
+    .meal-foot{display:flex;align-items:center;justify-content:space-between}
+    .price-tag{font-size:19px;font-weight:800;color:var(--orange)}
+    .price-tag del{font-size:12.5px;color:rgba(255,255,255,.38);margin-left:4px;font-weight:400}
+    .add-to-cart-btn{padding:8px 16px;border-radius:10px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--orange),var(--yellow));color:var(--dark);font-weight:700;font-size:13px;font-family:inherit;display:flex;align-items:center;gap:6px;transition:transform .2s}
+    .add-to-cart-btn:hover{transform:scale(1.05)}
+    .empty-state{grid-column:1/-1;text-align:center;padding:60px 20px;color:rgba(255,255,255,.45)}
+    .empty-state i{font-size:42px;margin-bottom:14px;display:block;color:var(--orange)}
+    .empty-state h3{font-size:18px;margin-bottom:8px;color:rgba(255,255,255,.7)}
+  </style>
+</head>
+<body>
+  <header class="header">
+    <a href="../index.html" class="logo-box">
+      <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--orange),var(--yellow));display:flex;align-items:center;justify-content:center;font-size:18px;">&#127869;&#65039;</div>
+      <span>Home<em>Bites</em></span>
+    </a>
+    <div class="header-actions">
+      <span id="navUserBadge" style="font-size:13px;color:rgba(255,255,255,.7);display:none;"></span>
+      <a href="profile.html" style="font-size:13px;color:rgba(255,255,255,.75);font-weight:600;"><i class="fa-solid fa-user"></i> Profile</a>
+      <a href="my-orders.html" style="font-size:13px;color:rgba(255,255,255,.75);font-weight:600;">My Orders</a>
+      <a href="cart.html" class="cart-btn-nav">
+        <i class="fa-solid fa-cart-shopping"></i> Cart
+        <span class="cart-count-badge" id="cartCount">0</span>
+      </a>
+      <button onclick="Homebites.logout()" style="background:none;border:none;color:#ff6b6b;font-size:13px;font-weight:600;cursor:pointer;padding:8px 12px;">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+      </button>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="menu-hero">
+      <h1>Fresh Homestyle Meals &#127858;</h1>
+      <p>72 authentic dishes &middot; Prepared daily at Madhapur Central Kitchen &middot; Delivery within 12 km</p>
+    </div>
+
+    <div class="search-wrap">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" id="searchInput" placeholder="Search 72 homemade dishes..." oninput="handleSearch(this.value)" />
+    </div>
+
+    <div class="filter-row">
+      <button class="cat-btn active" data-cat="all" onclick="filterCategory('all', this)">All <span id="cnt-all"></span></button>
+      <button class="cat-btn" data-cat="1" onclick="filterCategory('1', this)">&#x1F957; Pure Veg <span id="cnt-1"></span></button>
+      <button class="cat-btn" data-cat="2" onclick="filterCategory('2', this)">&#x1F357; Non-Veg <span id="cnt-2"></span></button>
+      <button class="cat-btn" data-cat="3" onclick="filterCategory('3', this)">&#x1F371; Thalis <span id="cnt-3"></span></button>
+      <button class="cat-btn" data-cat="4" onclick="filterCategory('4', this)">&#x1F96A; Snacks <span id="cnt-4"></span></button>
+      <div class="veg-toggle-wrap">
+        <input type="checkbox" id="vegOnly" onchange="applyFilters()" />
+        <label for="vegOnly" class="veg-toggle-label">&#x1F7E2; Veg Only</label>
+      </div>
+    </div>
+
+    <p class="results-bar" id="resultsBar">Loading...</p>
+    <div class="meals-grid" id="mealsContainer">
+      <div class="empty-state">
+        <i class="fa-solid fa-spinner fa-spin"></i>
+        <h3>Loading fresh meals...</h3>
+      </div>
+    </div>
+  </div>
+
+  <script src="../Scripts/page-runtime.js"></script>
+  <script src="../Scripts/auth.js"></script>
+  <script src="../Scripts/menu.js"></script>
+  <script>
+    var FALLBACK_IMG = 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=600&q=80';
+    var CAT_LABELS = { '1': 'Veg', '2': 'Non-Veg', '3': 'Thali', '4': 'Snack' };
+    var allMeals = [];
+    var activeCategory = 'all';
+    var searchQuery = '';
+
+    var user = Homebites.getUser();
+    if (user) {
+      var badge = document.getElementById('navUserBadge');
+      badge.style.display = 'inline-block';
+      badge.textContent = '\uD83D\uDC64 ' + user.fullName.split(' ')[0];
+    }
+    Homebites.updateCartBadge();
+
+    async function loadMenu() {
+      try {
+        var res = await fetch(API_BASE + '/menu');
+        var result = await res.json();
+        if (res.ok && result.success) {
+          allMeals = result.data;
+          updateCounts();
+          applyFilters();
+        } else {
+          showError('Failed to load menu. Please refresh the page.');
+        }
+      } catch(e) {
+        showError('Cannot connect to server. Make sure the backend is running.');
+      }
+    }
+
+    function updateCounts() {
+      document.getElementById('cnt-all').textContent = '(' + allMeals.length + ')';
+      document.getElementById('cnt-1').textContent = '(' + allMeals.filter(function(m){ return m.categoryId == 1; }).length + ')';
+      document.getElementById('cnt-2').textContent = '(' + allMeals.filter(function(m){ return m.categoryId == 2; }).length + ')';
+      document.getElementById('cnt-3').textContent = '(' + allMeals.filter(function(m){ return m.categoryId == 3; }).length + ')';
+      document.getElementById('cnt-4').textContent = '(' + allMeals.filter(function(m){ return m.categoryId == 4; }).length + ')';
+    }
+
+    function filterCategory(catId, btn) {
+      document.querySelectorAll('.cat-btn').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      activeCategory = catId;
+      applyFilters();
+    }
+
+    function handleSearch(val) {
+      searchQuery = val.trim().toLowerCase();
+      applyFilters();
+    }
+
+    function applyFilters() {
+      var vegOnly = document.getElementById('vegOnly').checked;
+      var result = allMeals.slice();
+      if (activeCategory !== 'all') {
+        result = result.filter(function(m){ return String(m.categoryId) === String(activeCategory); });
+      }
+      if (vegOnly) {
+        result = result.filter(function(m){ return m.isVeg; });
+      }
+      if (searchQuery.length > 0) {
+        result = result.filter(function(m){
+          return m.mealName.toLowerCase().indexOf(searchQuery) !== -1 ||
+                 (m.description || '').toLowerCase().indexOf(searchQuery) !== -1;
+        });
+      }
+      renderMeals(result);
+    }
+
+    function renderMeals(meals) {
+      var container = document.getElementById('mealsContainer');
+      var bar = document.getElementById('resultsBar');
+      if (!meals || meals.length === 0) {
+        bar.innerHTML = 'No items match your search.';
+        container.innerHTML = '<div class="empty-state"><i class="fa-solid fa-face-sad-tear"></i><h3>No dishes found</h3><p>Try a different search or filter.</p></div>';
+        return;
+      }
+      bar.innerHTML = 'Showing <strong>' + meals.length + '</strong> of <strong>' + allMeals.length + '</strong> dishes';
+      container.innerHTML = meals.map(function(m) {
+        var price = m.discountPrice || m.price;
+        var oldPrice = m.discountPrice ? '<del>&#8377;' + m.price + '</del>' : '';
+        var catLabel = CAT_LABELS[String(m.categoryId)] || '';
+        var imgSrc = m.imageUrl || FALLBACK_IMG;
+        var cartData = JSON.stringify({
+          mealId: m.id,
+          mealName: m.mealName,
+          price: m.price,
+          discountPrice: m.discountPrice,
+          isVeg: m.isVeg,
+          imageUrl: m.imageUrl
+        }).replace(/"/g, '&quot;');
+        return '<div class="meal-card" data-cat="' + m.categoryId + '">' +
+          '<div class="meal-thumb">' +
+            '<span class="veg-pill ' + (m.isVeg ? 'veg' : 'nonveg') + '">' + (m.isVeg ? '&#x1F7E2; Veg' : '&#x1F534; Non-Veg') + '</span>' +
+            '<span class="cat-chip">' + catLabel + '</span>' +
+            '<img src="' + imgSrc + '" alt="' + m.mealName + '" loading="lazy" onerror="this.onerror=null;this.src=\'' + FALLBACK_IMG + '\'" />' +
+            '<span class="prep-time"><i class="fa-regular fa-clock"></i> ' + (m.preparationMinutes || 20) + 'm</span>' +
+          '</div>' +
+          '<div class="meal-body">' +
+            '<h3>' + m.mealName + '</h3>' +
+            '<p class="meal-desc">' + (m.description || 'Delicious hot homemade preparation.') + '</p>' +
+            '<div class="meal-foot">' +
+              '<div class="price-tag">&#8377;' + price + ' ' + oldPrice + '</div>' +
+              '<button class="add-to-cart-btn" onclick=\'handleAddToCart(' + cartData.replace(/'/g, "&#39;") + ')\'>' +
+                '<i class="fa-solid fa-plus"></i> Add' +
+              '</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    function handleAddToCart(meal) {
+      Homebites.addToCart(meal);
+      Homebites.updateCartBadge();
+    }
+
+    function showError(msg) {
+      document.getElementById('resultsBar').textContent = '';
+      document.getElementById('mealsContainer').innerHTML = '<div class="empty-state"><i class="fa-solid fa-triangle-exclamation"></i><h3>' + msg + '</h3></div>';
+    }
+
+    loadMenu();
+  </script>
+</body>
+</html>

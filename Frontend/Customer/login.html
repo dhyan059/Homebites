@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Customer Login – HomeBites Hyderabad</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --orange: #FF6B35; --orange2: #FF8C42; --yellow: #FFC300;
+      --red: #E63946; --green: #06D6A0; --dark: #1A1A2E; --dark2: #16213E;
+      --white: #FFFFFF;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: radial-gradient(circle at top right, #16213E 0%, #1A1A2E 100%);
+      color: var(--white); min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 30px 16px;
+    }
+    .auth-card {
+      width: min(440px, 100%);
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,107,53,0.25);
+      backdrop-filter: blur(20px);
+      border-radius: 24px; padding: 40px 32px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+    }
+    .brand-header { text-align: center; margin-bottom: 26px; }
+    .brand-logo {
+      width: 54px; height: 54px; border-radius: 14px; margin: 0 auto 10px;
+      background: linear-gradient(135deg, var(--orange), var(--yellow));
+      display: flex; align-items: center; justify-content: center; font-size: 26px;
+      box-shadow: 0 6px 20px rgba(255,107,53,0.4);
+    }
+    .brand-header h1 { font-size: 24px; font-weight: 800; }
+    .brand-header p { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 4px; }
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: rgba(255,255,255,0.85); }
+    .input-box { position: relative; }
+    .input-box i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.4); font-size: 14px; }
+    .input-box input {
+      width: 100%; padding: 12px 16px 12px 42px;
+      background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.12);
+      border-radius: 12px; color: var(--white); font-size: 14px; font-family: inherit;
+      outline: none; transition: all 0.25s;
+    }
+    .input-box input:focus { border-color: var(--orange); background: rgba(255,107,53,0.06); }
+    .btn-submit {
+      width: 100%; padding: 14px; border-radius: 12px; border: none; cursor: pointer;
+      background: linear-gradient(135deg, var(--orange), var(--yellow));
+      color: var(--dark); font-size: 15px; font-weight: 800;
+      box-shadow: 0 6px 20px rgba(255,107,53,0.4); transition: transform 0.2s;
+      margin-top: 10px;
+    }
+    .btn-submit:hover { transform: translateY(-2px); }
+    .auth-footer { text-align: center; margin-top: 22px; font-size: 13px; color: rgba(255,255,255,0.6); }
+    .auth-footer a { color: var(--orange); font-weight: 600; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="auth-card">
+    <div class="brand-header">
+      <div class="brand-logo">🍽️</div>
+      <h1>Customer Login</h1>
+      <p>Log in to order fresh home food in Hyderabad</p>
+    </div>
+
+    <form id="loginForm" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label>Gmail or Mobile Number</label>
+        <div class="input-box">
+          <i class="fa-solid fa-user"></i>
+          <input type="text" id="loginIdentifier" placeholder="user@gmail.com or +919876543210" required />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Password</label>
+        <div class="input-box">
+          <i class="fa-solid fa-lock"></i>
+          <input type="password" id="loginPassword" placeholder="Enter your password" required />
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit" id="btnSubmit">
+        <i class="fa-solid fa-arrow-right-to-bracket"></i> Login
+      </button>
+      <div style="text-align:right;margin-top:10px;font-size:12px;"><a href="forgot-password.html" style="color:var(--orange);font-weight:600;text-decoration:none;">Forgot password?</a></div>
+    </form>
+
+    <div class="auth-footer">
+      New to HomeBites? <a href="register.html">Create an Account</a><br/>
+      <a href="../index.html" style="color:rgba(255,255,255,0.5);font-size:12px;margin-top:8px;display:inline-block;">← Back to Homepage</a>
+    </div>
+  </div>
+
+  <script src="../Scripts/auth.js"></script>
+  <script>
+    async function handleLogin(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnSubmit');
+      const identifier = document.getElementById('loginIdentifier').value.trim();
+      const password = document.getElementById('loginPassword').value;
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Logging in...';
+
+      try {
+        const response = await fetch(`${API_BASE}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ identifier, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          Homebites.setUser(data.user);
+          Homebites.showToast(`Welcome back, ${data.user.fullName}! 🎉`);
+          setTimeout(() => {
+            window.location.href = 'menu.html';
+          }, 1000);
+        } else {
+          Homebites.showToast(data.message || 'Invalid credentials.', true);
+        }
+      } catch (err) {
+        Homebites.showToast('Could not connect to Backend server.', true);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-arrow-right-to-bracket"></i> Login';
+      }
+    }
+  </script>
+</body>
+</html>
