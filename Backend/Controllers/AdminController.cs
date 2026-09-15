@@ -20,12 +20,13 @@ namespace Homebites.Controllers
         [HttpPost("login")]
         public IActionResult Login([FromBody] AdminLoginDto dto)
         {
-            if (dto.Email?.Trim().ToLower() == "admin@bites.in" &&
+            var email = dto.Email?.Trim().ToLowerInvariant();
+            if ((email == "admin@bites.in" || email == "adminbites@gmail.com") &&
                 dto.Password == "Dhyan@2003")
             {
                 return Ok(new {
                     success = true,
-                    admin = new { email = "admin@bites.in", name = "HomeBites Admin", role = "Admin" }
+                    admin = new { email, name = "HomeBites Admin", role = "Admin" }
                 });
             }
             return Unauthorized(new { success = false, message = "Invalid admin credentials." });
@@ -52,6 +53,17 @@ namespace Homebites.Controllers
         public async Task<IActionResult> UpdateOrderStatus(long id, [FromBody] OrderStatusDto dto)
         {
             var result = await _dispatcher.SendAsync(new UpdateOrderStatusCommand(id, dto.Status));
+            if (!result.Success)
+                return BadRequest(new { success = false, message = result.Message });
+
+            return Ok(new { success = true, message = result.Message });
+        }
+
+        // PUT api/admin/orders/{id}/payment (Command)
+        [HttpPut("orders/{id}/payment")]
+        public async Task<IActionResult> UpdateOrderPayment(long id, [FromBody] OrderPaymentStatusDto dto)
+        {
+            var result = await _dispatcher.SendAsync(new UpdateOrderPaymentCommand(id, dto.PaymentStatus));
             if (!result.Success)
                 return BadRequest(new { success = false, message = result.Message });
 
@@ -145,6 +157,7 @@ namespace Homebites.Controllers
 
     public class AdminLoginDto    { public string? Email { get; set; } public string? Password { get; set; } }
     public class OrderStatusDto   { public string Status { get; set; } = ""; }
+    public class OrderPaymentStatusDto { public string PaymentStatus { get; set; } = ""; }
     public class RefundDto        { public string? Reason { get; set; } }
     public class CreateCouponDto
     {

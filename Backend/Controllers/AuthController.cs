@@ -38,6 +38,11 @@ namespace Homebites.Controllers
             string cleanEmail = request.Email.Trim().ToLowerInvariant();
             string cleanMobile = request.Mobile.Trim();
 
+            if (IsAdminEmail(cleanEmail))
+            {
+                return BadRequest(new { success = false, message = "This email is reserved for the admin portal and cannot be registered as a customer." });
+            }
+
             // Strict check: must end with @gmail.com
             if (!cleanEmail.EndsWith("@gmail.com", StringComparison.OrdinalIgnoreCase))
             {
@@ -295,12 +300,22 @@ namespace Homebites.Controllers
             string identifier = request.Identifier.Trim();
             string passwordHash = HashPassword(request.Password);
 
+            if (IsAdminEmail(identifier))
+            {
+                return Unauthorized(new { success = false, message = "Admin accounts must sign in through the admin portal." });
+            }
+
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => (u.Email == identifier.ToLower() || u.Mobile == identifier) && u.PasswordHash == passwordHash);
 
             if (user == null)
             {
                 return Unauthorized(new { success = false, message = "Invalid credentials. Please check your email/mobile or password." });
+            }
+
+            if (!string.Equals(user.Role, "Customer", StringComparison.OrdinalIgnoreCase))
+            {
+                return Unauthorized(new { success = false, message = "This account must sign in through the appropriate portal." });
             }
 
             if (!user.IsActive)
@@ -324,6 +339,12 @@ namespace Homebites.Controllers
                     user.Role
                 }
             });
+        }
+
+        private static bool IsAdminEmail(string email)
+        {
+            var normalizedEmail = email.Trim().ToLowerInvariant();
+            return normalizedEmail == "adminbites@gmail.com" || normalizedEmail == "admin@bites.in";
         }
 
 

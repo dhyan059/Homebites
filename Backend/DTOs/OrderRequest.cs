@@ -44,6 +44,7 @@ namespace Homebites.DTOs
         public long Id { get; set; }
         public string OrderNumber { get; set; } = string.Empty;
         public DateTime OrderDate { get; set; }
+        public DateTime? UpdatedAt { get; set; }
         public string OrderStatus { get; set; } = string.Empty;
         public string PaymentStatus { get; set; } = string.Empty;
         public string PaymentMethod { get; set; } = string.Empty;

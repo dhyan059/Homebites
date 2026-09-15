@@ -12,6 +12,7 @@ namespace Homebites.Data
             context.Database.EnsureCreated();
             EnsureUserColumns(context);
             EnsureOrderColumns(context);
+            EnsureAddressColumns(context);
         }
 
         private static void EnsureUserColumns(HomebitesDbContext context)
@@ -83,6 +84,32 @@ namespace Homebites.Data
                     command.Parameters.Add(parameter);
                     command.ExecuteNonQuery();
                 }
+            }
+            finally
+            {
+                if (!wasOpen)
+                {
+                    connection.Close();
+                }
+            }
+        }
+
+        private static void EnsureAddressColumns(HomebitesDbContext context)
+        {
+            var connection = context.Database.GetDbConnection();
+            var wasOpen = connection.State == ConnectionState.Open;
+            if (!wasOpen)
+            {
+                connection.Open();
+            }
+
+            try
+            {
+                using var command = connection.CreateCommand();
+                command.CommandText = @"
+                    IF COL_LENGTH('UserAddresses', 'IsDeleted') IS NULL
+                        ALTER TABLE [UserAddresses] ADD [IsDeleted] BIT NOT NULL CONSTRAINT [DF_UserAddresses_IsDeleted] DEFAULT 0;";
+                command.ExecuteNonQuery();
             }
             finally
             {

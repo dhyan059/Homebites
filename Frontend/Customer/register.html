@@ -135,6 +135,12 @@
         return;
       }
 
+      const reservedAdminEmails = ['adminbites@gmail.com', 'admin@bites.in'];
+      if (reservedAdminEmails.includes(emailCheck.email.toLowerCase())) {
+        Homebites.showToast('This email is reserved for the admin portal and cannot be registered as a customer.', true);
+        return;
+      }
+
       // Validate Mobile (+91)
       const mobileCheck = Homebites.validateMobile(rawMobile);
       if (!mobileCheck.valid) {

@@ -235,8 +235,9 @@
       <p id="processingMsg" style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:14px;line-height:1.5;">
         Payment link has been sent to your UPI registered mobile number.
       </p>
+      <a id="upiPaymentLink" href="#" onclick="openUpiFromLink(event)" style="display:none;color:var(--yellow);font-size:13px;font-weight:700;text-decoration:underline;margin-bottom:14px;word-break:break-all;">Open secure UPI authorization link</a>
       <div style="font-size:12px;color:var(--green);font-weight:600;">
-        <i class="fa-solid fa-spinner fa-spin"></i> Preparing authorization gateway...
+        <i class="fa-solid fa-link"></i> Click the link above to enter your UPI PIN.
       </div>
     </div>
   </div>
@@ -265,7 +266,7 @@
       <div id="pinFailedBanner" style="display:none;background:rgba(230,57,70,0.15);border:1.5px solid rgba(230,57,70,0.4);border-radius:10px;padding:12px;margin-bottom:14px;text-align:center;">
         <div style="font-size:22px;margin-bottom:4px;">❌</div>
         <strong style="color:#ff6b6b;font-size:14px;">Payment Failed!</strong><br/>
-        <span style="font-size:12px;color:rgba(255,255,255,0.6);">Session timed out after 30 seconds. Please try again.</span>
+        <span style="font-size:12px;color:rgba(255,255,255,0.6);">Session timed out after 60 seconds. Please try again.</span>
       </div>
 
       <div id="pinInputArea" style="margin-bottom:16px;">
@@ -388,6 +389,33 @@
     const CORRECT_UPI_PIN = '290803'; // never shown on screen
     let pinTimerInterval = null;
     let pinTimerExpired  = false;
+    let pinTimerSeconds = 60;
+    let upiLinkClicked = false;
+    let upiAuthorization = null;
+
+    function createUpiAuthorization(fullUpiId) {
+      const token = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()) + Math.random();
+      upiAuthorization = { token: token, expiresAt: Date.now() + 60000, fullUpiId: fullUpiId };
+      sessionStorage.setItem('homebites_upi_authorization', JSON.stringify(upiAuthorization));
+      return new URL('checkout.html?upiToken=' + encodeURIComponent(token), window.location.href).href;
+    }
+
+    function openUpiFromLink(event) {
+      event.preventDefault();
+      var stored = null;
+      try { stored = JSON.parse(sessionStorage.getItem('homebites_upi_authorization')); } catch(e) {}
+      if (!stored || !stored.token || stored.expiresAt <= Date.now()) {
+        Homebites.showToast('This UPI link has expired. Generate a new link.', true);
+        return;
+      }
+      upiAuthorization = stored;
+      upiLinkClicked = true;
+      document.getElementById('paymentProcessingModal').classList.remove('open');
+      document.getElementById('paymentOtpSubtitle').textContent =
+        'UPI link verified for ' + stored.fullUpiId + '. Enter your PIN within 60 seconds:';
+      document.getElementById('payOtpInput').value = '';
+      openUpiPinModal(true);
+    }
 
     function validateAndInitiatePayment() {
       if (currentPaymentMethod === 'UPI') {
@@ -411,22 +439,18 @@
         console.log('%c================================================================', 'color:#06D6A0;font-size:13px;font-weight:bold;');
         console.log('%c UPI PAYMENT GATEWAY â€” HomeBites', 'color:#FF6B35;font-size:15px;font-weight:bold;');
         console.log('%c Payment link (click to authorize in your UPI app):', 'color:#fff;font-size:13px;');
-        console.log('%c https://upi.homebites.in/pay/' + encodeURIComponent(fullUpiId) + '?amount=' + total + '&note=HomeBites-Order', 'color:#FFC300;font-size:13px;font-weight:bold;text-decoration:underline;');
-        console.log('%c Enter your UPI PIN in the app within 30 seconds.', 'color:rgba(255,255,255,0.6);font-size:12px;');
+        var paymentLink = createUpiAuthorization(fullUpiId);
+        console.log('%c ' + paymentLink, 'color:#FFC300;font-size:13px;font-weight:bold;text-decoration:underline;');
+        console.log('%c Click the link above, then enter your UPI PIN within 60 seconds.', 'color:rgba(255,255,255,0.6);font-size:12px;');
         console.log('%c================================================================', 'color:#06D6A0;font-size:13px;font-weight:bold;');
 
         document.getElementById('processingMsg').innerHTML =
-          'Payment link sent to your UPI registered mobile.<br/>' +
+          'Payment link generated. Click it to continue.<br/>' +
           '<strong style="color:var(--orange);font-size:15px;">&#8377;' + total + ' &rarr; ' + fullUpiId + '</strong>';
+        var linkEl = document.getElementById('upiPaymentLink');
+        linkEl.href = paymentLink;
+        linkEl.style.display = 'inline-block';
         document.getElementById('paymentProcessingModal').classList.add('open');
-
-        setTimeout(function() {
-          document.getElementById('paymentProcessingModal').classList.remove('open');
-          document.getElementById('paymentOtpSubtitle').textContent =
-            'Link sent to registered mobile for ' + fullUpiId + '. Enter your UPI PIN to authorize:';
-          document.getElementById('payOtpInput').value = '';
-          openUpiPinModal();
-        }, 1800);
         return;
       }
 
@@ -454,7 +478,7 @@
         document.getElementById('paymentOtpSubtitle').textContent =
           'Enter your 6-digit Bank Authorization PIN within 30 seconds:';
         document.getElementById('payOtpInput').value = '';
-        openUpiPinModal();
+        openUpiPinModal(false);
         return;
       }
 
@@ -463,7 +487,8 @@
     }
 
     // â”€â”€â”€ 30-SECOND PIN MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    function openUpiPinModal() {
+    function openUpiPinModal(linkWasClicked) {
+      if (currentPaymentMethod === 'UPI' && !linkWasClicked && !upiLinkClicked) return;
       pinTimerExpired = false;
       document.getElementById('paymentOtpModal').classList.add('open');
       document.getElementById('pinFailedBanner').style.display = 'none';
@@ -473,7 +498,8 @@
       document.getElementById('payOtpInput').disabled          = false;
       document.getElementById('btnAuthorize').disabled         = false;
 
-      var secsLeft = 30;
+      pinTimerSeconds = currentPaymentMethod === 'UPI' ? 60 : 30;
+      var secsLeft = pinTimerSeconds;
       updateCountdownUI(secsLeft);
       clearInterval(pinTimerInterval);
       pinTimerInterval = setInterval(function() {
@@ -490,8 +516,10 @@
       var countEl = document.getElementById('pinCountdown');
       var fillEl  = document.getElementById('pinTimerFill');
       var color   = secs <= 10 ? '#E63946' : 'var(--orange)';
-      if (countEl) { countEl.textContent = '0:' + (secs < 10 ? '0' : '') + secs; countEl.style.color = color; }
-      if (fillEl)  { fillEl.style.width = ((secs / 30) * 100) + '%'; fillEl.style.background = color; }
+      var minutes = Math.floor(secs / 60);
+      var seconds = secs % 60;
+      if (countEl) { countEl.textContent = minutes + ':' + (seconds < 10 ? '0' : '') + seconds; countEl.style.color = color; }
+      if (fillEl)  { fillEl.style.width = ((secs / pinTimerSeconds) * 100) + '%'; fillEl.style.background = color; }
     }
 
     function onPinTimeout() {
@@ -519,6 +547,10 @@
 
     function confirmAndPlaceOrderFinal() {
       if (pinTimerExpired) return;
+      if (currentPaymentMethod === 'UPI' && !upiLinkClicked) {
+        Homebites.showToast('Open the generated UPI link before entering your PIN.', true);
+        return;
+      }
       var entered = document.getElementById('payOtpInput').value.trim();
       if (!/^\d{6}$/.test(entered)) {
         Homebites.showToast('Please enter your 6-digit UPI PIN.', true);
@@ -533,6 +565,20 @@
       closePaymentOtpModal();
       executeOrderPlacement();
     }
+
+    (function openAuthorizationFromUrl() {
+      var token = new URLSearchParams(window.location.search).get('upiToken');
+      if (!token) return;
+      var stored = null;
+      try { stored = JSON.parse(sessionStorage.getItem('homebites_upi_authorization')); } catch(e) {}
+      if (stored && stored.token === token && stored.expiresAt > Date.now()) {
+        upiAuthorization = stored;
+        upiLinkClicked = true;
+        document.getElementById('paymentProcessingModal').classList.remove('open');
+        document.getElementById('paymentOtpSubtitle').textContent = 'UPI link verified. Enter your PIN within 60 seconds:';
+        openUpiPinModal(true);
+      }
+    })();
 
     async function executeOrderPlacement() {
       var btn = document.getElementById('btnPlaceOrder');

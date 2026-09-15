@@ -22,7 +22,7 @@ namespace Homebites.Controllers
         public async Task<IActionResult> GetUserAddresses(int userId)
         {
             var addresses = await _context.UserAddresses
-                .Where(a => a.UserId == userId)
+                .Where(a => a.UserId == userId && !a.IsDeleted)
                 .OrderByDescending(a => a.IsDefault)
                 .ThenByDescending(a => a.CreatedAt)
                 .ToListAsync();
@@ -157,7 +157,9 @@ namespace Homebites.Controllers
                 return Unauthorized(new { success = false, message = "Unauthorized to delete this address." });
             }
 
-            _context.UserAddresses.Remove(address);
+            address.IsDeleted = true;
+            address.IsDefault = false;
+            address.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
 
             return Ok(new { success = true, message = "Address deleted successfully." });

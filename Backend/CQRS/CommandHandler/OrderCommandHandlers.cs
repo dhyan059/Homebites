@@ -108,11 +108,37 @@ namespace Homebites.CQRS.CommandHandler
             if (!validStatuses.Contains(command.Status))
                 return new CommandResult(false, "Invalid status value.");
 
+            if (command.Status == "Delivered" && order.PaymentMethod == "CashOnDelivery" && order.PaymentStatus != "Paid")
+                return new CommandResult(false, "Collect the full COD amount before marking this order as delivered.");
+
             order.OrderStatus = command.Status;
             order.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync(cancellationToken);
 
             return new CommandResult(true, $"Order {order.OrderNumber} updated to {command.Status}.");
+        }
+    }
+
+    public class UpdateOrderPaymentCommandHandler : ICommandHandler<UpdateOrderPaymentCommand, CommandResult>
+    {
+        private readonly HomebitesDbContext _context;
+        public UpdateOrderPaymentCommandHandler(HomebitesDbContext context) { _context = context; }
+
+        public async Task<CommandResult> HandleAsync(UpdateOrderPaymentCommand command, CancellationToken cancellationToken = default)
+        {
+            var order = await _context.Orders.FindAsync(new object[] { command.OrderId }, cancellationToken);
+            if (order == null) return new CommandResult(false, "Order not found.");
+            if (order.PaymentMethod != "CashOnDelivery")
+                return new CommandResult(false, "Only COD orders can be marked as cash collected.");
+            if (command.PaymentStatus != "Paid")
+                return new CommandResult(false, "Invalid COD payment status.");
+            if (order.PaymentStatus == "Paid")
+                return new CommandResult(false, "COD payment is already marked as collected.");
+
+            order.PaymentStatus = "Paid";
+            order.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync(cancellationToken);
+            return new CommandResult(true, $"COD payment of ₹{order.TotalAmount:0.00} collected for order {order.OrderNumber}.");
         }
     }
 

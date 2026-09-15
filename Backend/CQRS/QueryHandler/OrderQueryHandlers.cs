@@ -28,6 +28,7 @@ namespace Homebites.CQRS.QueryHandler
                 Id = o.Id,
                 OrderNumber = o.OrderNumber,
                 OrderDate = o.OrderDate,
+                UpdatedAt = o.UpdatedAt,
                 OrderStatus = o.OrderStatus,
                 PaymentStatus = o.PaymentStatus,
                 PaymentMethod = o.PaymentMethod,

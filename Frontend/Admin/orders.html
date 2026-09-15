@@ -162,20 +162,27 @@
   function getStatusBtns(o){
     const id=o.id, s=o.orderStatus;
     var btns='';
+    const isCod = o.paymentMethod === 'CashOnDelivery';
+    const canDeliver = !isCod || o.paymentStatus === 'Paid';
+
+    if(isCod && o.paymentStatus !== 'Paid')
+      btns+='<button class="btn-sm btn-warn" onclick="collectCash('+id+')"><i class="fa-solid fa-money-bill-wave"></i> Collect ₹'+Number(o.totalAmount).toFixed(2)+'</button>';
 
     // 1. Regular Order Status Workflow
     if(s==='Accepted')   btns+='<button class="btn-sm btn-warn" onclick="updateStatus('+id+',\'Preparing\')">Mark Preparing</button>';
     if(s==='Preparing')  {
       btns+='<button class="btn-sm btn-info" onclick="updateStatus('+id+',\'Ready\')">Mark Ready</button>';
-      btns+='<button class="btn-sm btn-success" onclick="updateStatus('+id+',\'Delivered\')">Mark Delivered</button>';
+      if(canDeliver) btns+='<button class="btn-sm btn-success" onclick="updateStatus('+id+',\'Delivered\')">Mark Delivered</button>';
     }
     if(s==='Ready') {
       btns+='<button class="btn-sm btn-info" onclick="updateStatus('+id+',\'PickedUp\')">Mark Picked Up</button>';
-      btns+='<button class="btn-sm btn-success" onclick="updateStatus('+id+',\'Delivered\')">Mark Delivered</button>';
+      if(canDeliver) btns+='<button class="btn-sm btn-success" onclick="updateStatus('+id+',\'Delivered\')">Mark Delivered</button>';
     }
     if(s==='PickedUp') {
-      btns+='<button class="btn-sm btn-success" onclick="updateStatus('+id+',\'Delivered\')">Mark Delivered</button>';
+      if(canDeliver) btns+='<button class="btn-sm btn-success" onclick="updateStatus('+id+',\'Delivered\')">Mark Delivered</button>';
     }
+    if(isCod && !canDeliver && ['Preparing','Ready','PickedUp'].includes(s))
+      btns+='<span style="color:var(--yellow);font-size:11px;font-weight:600;">Collect payment before delivery</span>';
     if(s==='Delivered') {
       btns+='<span style="color:var(--green);font-weight:700;font-size:12px;"><i class="fa-solid fa-circle-check"></i> Delivered</span>';
     }
@@ -246,6 +253,24 @@
       const r=await fetch(ADMIN_API+'/orders/'+id+'/status',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({status})});
       const d=await r.json();
       if(d.success){showToast('&#10003; '+d.message);loadOrders();}
+      else showToast('Error: '+d.message);
+    }catch(e){showToast('Server error.');}
+  }
+
+  async function collectCash(id){
+    const order = allOrders.find(o => o.id === id);
+    if(!order) return;
+    const entered = prompt('Enter the exact cash collected for order '+order.orderNumber+' (₹'+Number(order.totalAmount).toFixed(2)+'):');
+    if(entered === null) return;
+    const amount = Number(String(entered).replace(/,/g, '').trim());
+    if(!Number.isFinite(amount) || Math.abs(amount - Number(order.totalAmount)) > 0.01){
+      showToast('Enter the exact order amount before marking COD as collected.');
+      return;
+    }
+    try{
+      const r=await fetch(ADMIN_API+'/orders/'+id+'/payment',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentStatus:'Paid'})});
+      const d=await r.json();
+      if(d.success){showToast('✓ COD amount collected successfully.');loadOrders();}
       else showToast('Error: '+d.message);
     }catch(e){showToast('Server error.');}
   }
