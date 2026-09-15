@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -70,6 +70,8 @@
     <div class="sb-section">Catalogue</div>
     <a href="menu.html"    class="sb-item"><i class="fa-solid fa-utensils"></i> Menu Items</a>
     <a href="coupons.html" class="sb-item active"><i class="fa-solid fa-tags"></i> Coupons</a>
+    <div class="sb-section">Navigation</div>
+    <a href="../index.html" class="sb-item" style="color:var(--yellow);"><i class="fa-solid fa-arrow-left"></i> Back to Home</a>
   </div>
   <div class="sb-footer">
     <div class="sb-logout" onclick="adminLogout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</div>
@@ -79,7 +81,10 @@
 <div class="main">
   <div class="topbar">
     <h2>🎟️ Coupon & Discount Management</h2>
-    <div class="admin-badge"><div class="dot"></div><span id="adminName">Admin</span></div>
+    <div style="display:flex;align-items:center;gap:16px;">
+      <a href="../index.html" style="font-size:12.5px;font-weight:600;padding:6px 14px;border-radius:8px;background:rgba(255,255,255,0.08);color:var(--yellow);border:1px solid rgba(255,195,0,0.3);text-decoration:none;display:inline-flex;align-items:center;gap:6px;"><i class="fa-solid fa-house"></i> Customer Home</a>
+      <div class="admin-badge"><div class="dot"></div><span id="adminName">Admin</span></div>
+    </div>
   </div>
 
   <div class="content">

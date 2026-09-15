@@ -124,9 +124,9 @@
       <div id="upiPanel" class="pay-details-panel">
         <div class="grid-2">
           <div class="form-group">
-            <label>10-Digit Mobile / User ID</label>
+            <label>UPI User ID</label>
             <div class="input-box">
-              <input type="text" id="upiUserPart" placeholder="e.g. 9876543210" maxlength="15" />
+              <input type="text" id="upiUserPart" placeholder="Enter UPI user ID" maxlength="15" />
             </div>
           </div>
           <div class="form-group">
@@ -244,24 +244,47 @@
   <!-- AUTHORIZE UPI / BANK PIN MODAL -->
   <div class="modal-overlay" id="paymentOtpModal">
     <div class="modal-card">
-      <div style="font-size:40px;margin-bottom:10px;">🔐</div>
-      <h3 style="font-size:18px;margin-bottom:6px;">Authorize Payment</h3>
-      <p id="paymentOtpSubtitle" style="font-size:12.5px;color:rgba(255,255,255,0.65);margin-bottom:18px;">
-        Enter your 6-digit security PIN to authorize this transaction:
+      <div style="font-size:40px;margin-bottom:10px;" id="pinModalIcon">🔐</div>
+      <h3 style="font-size:18px;margin-bottom:6px;" id="pinModalTitle">Authorize Payment</h3>
+      <p id="paymentOtpSubtitle" style="font-size:12.5px;color:rgba(255,255,255,0.65);margin-bottom:12px;">
+        Enter your UPI PIN to confirm the transaction.
       </p>
 
-      <div style="margin-bottom:20px;">
+      <!-- Countdown Timer -->
+      <div id="pinTimerBar" style="margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <span style="font-size:12px;color:rgba(255,255,255,0.5);">Time remaining to authorize:</span>
+          <span id="pinCountdown" style="font-size:18px;font-weight:800;color:var(--orange);">0:30</span>
+        </div>
+        <div style="height:4px;border-radius:4px;background:rgba(255,255,255,0.1);overflow:hidden;">
+          <div id="pinTimerFill" style="height:100%;width:100%;background:var(--orange);transition:width 1s linear;border-radius:4px;"></div>
+        </div>
+      </div>
+
+      <!-- Payment Failed Banner (hidden until timeout) -->
+      <div id="pinFailedBanner" style="display:none;background:rgba(230,57,70,0.15);border:1.5px solid rgba(230,57,70,0.4);border-radius:10px;padding:12px;margin-bottom:14px;text-align:center;">
+        <div style="font-size:22px;margin-bottom:4px;">❌</div>
+        <strong style="color:#ff6b6b;font-size:14px;">Payment Failed!</strong><br/>
+        <span style="font-size:12px;color:rgba(255,255,255,0.6);">Session timed out after 30 seconds. Please try again.</span>
+      </div>
+
+      <div id="pinInputArea" style="margin-bottom:16px;">
         <input type="password" id="payOtpInput" maxlength="6" placeholder="••••••" style="width:100%;padding:14px;text-align:center;font-size:24px;font-weight:800;letter-spacing:8px;background:rgba(255,255,255,0.08);border:1.5px solid var(--orange);border-radius:12px;color:#fff;outline:none;" autocomplete="off" />
       </div>
 
-      <div style="display:flex;gap:10px;">
-        <button onclick="confirmAndPlaceOrderFinal()" style="flex:1;padding:13px;border-radius:10px;border:none;background:var(--orange);color:#fff;font-weight:700;font-size:14px;cursor:pointer;">
+      <div id="pinActionBtns" style="display:flex;gap:10px;">
+        <button id="btnAuthorize" onclick="confirmAndPlaceOrderFinal()" style="flex:1;padding:13px;border-radius:10px;border:none;background:var(--orange);color:#fff;font-weight:700;font-size:14px;cursor:pointer;">
           Authorize Payment
         </button>
         <button onclick="closePaymentOtpModal()" style="padding:13px 18px;border-radius:10px;border:1px solid rgba(255,255,255,0.2);background:transparent;color:#fff;cursor:pointer;">
           Cancel
         </button>
       </div>
+
+      <!-- Try Again button (shown on timeout) -->
+      <button id="btnTryAgain" onclick="retryPayment()" style="display:none;width:100%;padding:13px;border-radius:10px;border:1px solid rgba(255,107,53,0.4);background:rgba(255,107,53,0.12);color:var(--orange);font-weight:700;font-size:14px;cursor:pointer;margin-top:4px;">
+        🔄 Try Again
+      </button>
     </div>
   </div>
 
@@ -293,9 +316,9 @@
     function renderSummary() {
       total = Math.max(0, subtotal - discountAmount) + delivery + tax;
       document.getElementById('orderSummaryDetails').innerHTML = `
-        <strong>${cart.length} item(s)</strong> &nbsp;|&nbsp; 
-        Subtotal: ₹${subtotal} ${discountAmount > 0 ? `<strong style="color:var(--green)">(-₹${discountAmount} Coupon)</strong>` : ''} + Delivery: ₹${delivery} + Tax: ₹${tax} = 
-        <strong style="color:var(--orange);font-size:17px;">₹${total}</strong>
+        <strong>${cart.length} item(s)</strong> &nbsp;|&nbsp;
+        Subtotal: &#8377;${subtotal} ${discountAmount > 0 ? `<strong style="color:var(--green)">(-&#8377;${discountAmount} Coupon)</strong>` : ''} + Delivery: &#8377;${delivery} + Tax: &#8377;${tax} =
+        <strong style="color:var(--orange);font-size:17px;">&#8377;${total}</strong>
       `;
     }
     renderSummary();
@@ -334,7 +357,7 @@
       if (subtotal < match.minOrder) {
         msg.style.display = 'block';
         msg.style.color = '#ff6b6b';
-        msg.textContent = `Minimum order amount for ${code} is ₹${match.minOrder}.`;
+        msg.textContent = `Minimum order amount for ${code} is &#8377;${match.minOrder}.`;
         return;
       }
 
@@ -344,7 +367,7 @@
 
       msg.style.display = 'block';
       msg.style.color = '#06D6A0';
-      msg.textContent = `🎉 Coupon ${match.code} applied! Saved ₹${discountAmount}.`;
+      msg.textContent = `Coupon ${match.code} applied! Saved &#8377;${discountAmount}.`;
       renderSummary();
     }
 
@@ -361,115 +384,166 @@
       document.getElementById('cardPanel').style.display = (method === 'Card') ? 'block' : 'none';
     }
 
-    let paymentOtp = '';
+    // â”€â”€â”€ PAYMENT CONFIG â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    const CORRECT_UPI_PIN = '290803'; // never shown on screen
+    let pinTimerInterval = null;
+    let pinTimerExpired  = false;
 
     function validateAndInitiatePayment() {
-      // 1. UPI Validation
       if (currentPaymentMethod === 'UPI') {
-        const upiUser = document.getElementById('upiUserPart').value.trim();
+        const upiUser   = document.getElementById('upiUserPart').value.trim();
         const upiHandle = document.getElementById('upiHandle').value;
 
         if (!upiUser || upiUser.length < 3) {
-          Homebites.showToast('Please enter your 10-digit mobile number or UPI ID.', true);
+          Homebites.showToast('Please enter your UPI user ID.', true);
           return;
         }
 
-        const validHandles = ['@okhdfcbank', '@okaxis', '@oksbi', '@okicici', '@ybl', '@ibl', '@axl', '@paytm', '@upi'];
+        const validHandles = ['@okhdfcbank','@okaxis','@oksbi','@okicici','@ybl','@ibl','@axl','@paytm','@upi'];
         if (!validHandles.includes(upiHandle)) {
           Homebites.showToast('Please select one of the approved UPI handles.', true);
           return;
         }
 
         const fullUpiId = upiUser + upiHandle;
-        paymentOtp = String(Math.floor(100000 + Math.random() * 900000));
 
-        // Log payment request details; the OTP remains hidden from the page.
-        console.log("%c========================================================", "color: #06D6A0; font-size: 14px; font-weight: bold;");
-        console.log("%c📲 UPI PAYMENT GATEWAY REQUEST", "color: #FF6B35; font-size: 15px; font-weight: bold;");
-        console.log(`%c👉 Payment request link sent to UPI registered mobile: %chttps://upi.homebites.in/pay/${encodeURIComponent(fullUpiId)}`, "color: #FFFFFF; font-size: 13px;", "color: #FFC300; font-weight: bold;");
-        console.log("%c👉 Payment OTP: %c" + paymentOtp, "color: #FFFFFF; font-size: 13px;", "color: #06D6A0; font-size: 16px; font-weight: bold; background:#16213E; padding: 2px 6px; border-radius: 4px;");
-        console.log("%c========================================================", "color: #06D6A0; font-size: 14px; font-weight: bold;");
+        // Only log to console â€” nothing shown on page
+        console.log('%c================================================================', 'color:#06D6A0;font-size:13px;font-weight:bold;');
+        console.log('%c UPI PAYMENT GATEWAY â€” HomeBites', 'color:#FF6B35;font-size:15px;font-weight:bold;');
+        console.log('%c Payment link (click to authorize in your UPI app):', 'color:#fff;font-size:13px;');
+        console.log('%c https://upi.homebites.in/pay/' + encodeURIComponent(fullUpiId) + '?amount=' + total + '&note=HomeBites-Order', 'color:#FFC300;font-size:13px;font-weight:bold;text-decoration:underline;');
+        console.log('%c Enter your UPI PIN in the app within 30 seconds.', 'color:rgba(255,255,255,0.6);font-size:12px;');
+        console.log('%c================================================================', 'color:#06D6A0;font-size:13px;font-weight:bold;');
 
-        // Show intermediate popup
-        document.getElementById('processingMsg').innerHTML = `
-          Payment request of <strong>₹${total}</strong> sent to UPI registered mobile:<br/>
-          <strong style="color:var(--orange);font-size:15px;">${fullUpiId}</strong>
-        `;
+        document.getElementById('processingMsg').innerHTML =
+          'Payment link sent to your UPI registered mobile.<br/>' +
+          '<strong style="color:var(--orange);font-size:15px;">&#8377;' + total + ' &rarr; ' + fullUpiId + '</strong>';
         document.getElementById('paymentProcessingModal').classList.add('open');
 
-        setTimeout(() => {
+        setTimeout(function() {
           document.getElementById('paymentProcessingModal').classList.remove('open');
-          document.getElementById('paymentOtpSubtitle').textContent = `Payment authorization request sent to: ${fullUpiId}. Enter UPI PIN to confirm:`;
+          document.getElementById('paymentOtpSubtitle').textContent =
+            'Link sent to registered mobile for ' + fullUpiId + '. Enter your UPI PIN to authorize:';
           document.getElementById('payOtpInput').value = '';
-          document.getElementById('paymentOtpModal').classList.add('open');
+          openUpiPinModal();
         }, 1800);
         return;
       }
 
-      // 2. Card Validation
       if (currentPaymentMethod === 'Card') {
-        const cardNum = document.getElementById('cardNumber').value.trim().replace(/\s+/g, '');
+        const cardNum  = document.getElementById('cardNumber').value.trim().replace(/\s+/g, '');
         const expMonth = parseInt(document.getElementById('cardExpMonth').value, 10);
-        const expYear = parseInt(document.getElementById('cardExpYear').value, 10);
-        const cvv = document.getElementById('cardCvv').value.trim();
+        const expYear  = parseInt(document.getElementById('cardExpYear').value, 10);
+        const cvv      = document.getElementById('cardCvv').value.trim();
 
         if (!/^\d{12}$/.test(cardNum)) {
           Homebites.showToast('Card number must be exactly 12 numeric digits.', true);
           return;
         }
-
         if (!/^\d{3}$/.test(cvv)) {
           Homebites.showToast('CVV must be exactly 3 numeric digits.', true);
           return;
         }
-
         const now = new Date();
-        const currentYear = now.getFullYear();
-        const currentMonth = now.getMonth() + 1;
-
-        if (expYear < currentYear || (expYear === currentYear && expMonth < currentMonth)) {
-          Homebites.showToast('Card has expired! Expiry must be valid for the current date.', true);
+        if (expYear < now.getFullYear() || (expYear === now.getFullYear() && expMonth < now.getMonth() + 1)) {
+          Homebites.showToast('Card has expired! Please use a valid card.', true);
           return;
         }
 
-        paymentOtp = String(Math.floor(100000 + Math.random() * 900000));
-        console.log("%c💳 CARD PAYMENT AUTHORIZATION", "color: #FF6B35; font-size: 15px; font-weight: bold;");
-        console.log("%c👉 Card payment OTP: %c" + paymentOtp, "color: #FFFFFF; font-size: 13px;", "color: #06D6A0; font-size: 16px; font-weight: bold; background:#16213E; padding: 2px 6px; border-radius: 4px;");
-
-        document.getElementById('paymentOtpSubtitle').textContent = 'Enter your 6-digit Bank Authorization PIN to confirm:';
+        console.log('%c CARD PAYMENT AUTHORIZATION â€” HomeBites', 'color:#FF6B35;font-size:15px;font-weight:bold;');
+        document.getElementById('paymentOtpSubtitle').textContent =
+          'Enter your 6-digit Bank Authorization PIN within 30 seconds:';
         document.getElementById('payOtpInput').value = '';
-        document.getElementById('paymentOtpModal').classList.add('open');
+        openUpiPinModal();
         return;
       }
 
-      // COD directly places order
+      // COD â€” place order directly
       executeOrderPlacement();
     }
 
+    // â”€â”€â”€ 30-SECOND PIN MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    function openUpiPinModal() {
+      pinTimerExpired = false;
+      document.getElementById('paymentOtpModal').classList.add('open');
+      document.getElementById('pinFailedBanner').style.display = 'none';
+      document.getElementById('pinInputArea').style.display    = 'block';
+      document.getElementById('pinActionBtns').style.display   = 'flex';
+      document.getElementById('btnTryAgain').style.display     = 'none';
+      document.getElementById('payOtpInput').disabled          = false;
+      document.getElementById('btnAuthorize').disabled         = false;
+
+      var secsLeft = 30;
+      updateCountdownUI(secsLeft);
+      clearInterval(pinTimerInterval);
+      pinTimerInterval = setInterval(function() {
+        secsLeft--;
+        updateCountdownUI(secsLeft);
+        if (secsLeft <= 0) {
+          clearInterval(pinTimerInterval);
+          onPinTimeout();
+        }
+      }, 1000);
+    }
+
+    function updateCountdownUI(secs) {
+      var countEl = document.getElementById('pinCountdown');
+      var fillEl  = document.getElementById('pinTimerFill');
+      var color   = secs <= 10 ? '#E63946' : 'var(--orange)';
+      if (countEl) { countEl.textContent = '0:' + (secs < 10 ? '0' : '') + secs; countEl.style.color = color; }
+      if (fillEl)  { fillEl.style.width = ((secs / 30) * 100) + '%'; fillEl.style.background = color; }
+    }
+
+    function onPinTimeout() {
+      pinTimerExpired = true;
+      document.getElementById('pinFailedBanner').style.display = 'block';
+      document.getElementById('pinInputArea').style.display    = 'none';
+      document.getElementById('pinActionBtns').style.display   = 'none';
+      document.getElementById('btnTryAgain').style.display     = 'block';
+      var c = document.getElementById('pinCountdown');
+      var f = document.getElementById('pinTimerFill');
+      if (c) { c.textContent = '0:00'; c.style.color = '#E63946'; }
+      if (f) { f.style.width = '0%'; f.style.background = '#E63946'; }
+    }
+
+    function retryPayment() {
+      closePaymentOtpModal();
+      var btn = document.getElementById('btnPlaceOrder');
+      if (btn) { btn.disabled = false; btn.innerHTML = 'Place Order Now &rarr;'; }
+    }
+
     function closePaymentOtpModal() {
+      clearInterval(pinTimerInterval);
       document.getElementById('paymentOtpModal').classList.remove('open');
     }
 
     function confirmAndPlaceOrderFinal() {
-      const enteredOtp = document.getElementById('payOtpInput').value.trim();
-      if (!/^\d{6}$/.test(enteredOtp) || enteredOtp !== paymentOtp) {
-        Homebites.showToast('Incorrect payment OTP. Enter the 6-digit OTP shown in the browser console.', true);
+      if (pinTimerExpired) return;
+      var entered = document.getElementById('payOtpInput').value.trim();
+      if (!/^\d{6}$/.test(entered)) {
+        Homebites.showToast('Please enter your 6-digit UPI PIN.', true);
         return;
       }
+      if (entered !== CORRECT_UPI_PIN) {
+        Homebites.showToast('Incorrect PIN. Please try again.', true);
+        document.getElementById('payOtpInput').value = '';
+        return;
+      }
+      clearInterval(pinTimerInterval);
       closePaymentOtpModal();
       executeOrderPlacement();
     }
 
     async function executeOrderPlacement() {
-      const btn = document.getElementById('btnPlaceOrder');
+      var btn = document.getElementById('btnPlaceOrder');
       btn.disabled = true;
       btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing Order...';
 
-      const items = cart.map(i => ({ mealId: i.mealId, quantity: i.quantity }));
-      const notes = document.getElementById('customerNotes').value.trim();
+      var items = cart.map(function(i) { return { mealId: i.mealId, quantity: i.quantity }; });
+      var notes = document.getElementById('customerNotes').value.trim();
 
       try {
-        const response = await fetch(`${API_BASE}/order`, {
+        var response = await fetch(API_BASE + '/order', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -477,13 +551,12 @@
             addressId: parseInt(addressId, 10),
             paymentMethod: currentPaymentMethod,
             customerNotes: notes,
-            items
+            items: items
           })
         });
 
-        const data = await response.json();
+        var data = await response.json();
         if (response.ok && data.success) {
-          // Save cart snapshot for order-success page
           localStorage.setItem('homebites_order_snapshot', JSON.stringify({
             cart: cart,
             paymentMethod: currentPaymentMethod,
@@ -491,20 +564,20 @@
             orderNumber: data.orderNumber,
             orderId: data.orderId
           }));
-          Homebites.saveCart([]); // clear cart
-          Homebites.showToast('🎉 Order placed successfully!');
-          setTimeout(() => {
-            window.location.href = `order-success.html?orderId=${data.orderId}&orderNumber=${data.orderNumber}`;
+          Homebites.saveCart([]);
+          Homebites.showToast('Order placed successfully!');
+          setTimeout(function() {
+            window.location.href = 'order-success.html?orderId=' + data.orderId + '&orderNumber=' + data.orderNumber;
           }, 800);
         } else {
-          Homebites.showToast(data.message || 'Failed to place order.', true);
+          Homebites.showToast((data && data.message) || 'Failed to place order.', true);
           btn.disabled = false;
-          btn.innerHTML = 'Place Order Now →';
+          btn.innerHTML = 'Place Order Now &rarr;';
         }
       } catch (err) {
         Homebites.showToast('Could not connect to server.', true);
         btn.disabled = false;
-        btn.innerHTML = 'Place Order Now →';
+        btn.innerHTML = 'Place Order Now &rarr;';
       }
     }
   </script>

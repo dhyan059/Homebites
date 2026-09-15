@@ -1,60 +1,52 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Homebites.Data;
-using System.Diagnostics;
+using Homebites.CQRS.Common;
 
-[DebuggerDisplay($"{{{nameof(GetDebuggerDisplay)}(),nq}}")]
+var builder = WebApplication.CreateBuilder(args);
 
-internal class Program
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.SetMinimumLevel(LogLevel.Information);
+
+// Add DB Context
+builder.Services.AddDbContext<HomebitesDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Enable CORS for frontend
+builder.Services.AddCors(options =>
 {
-    private static void Main(string[] args)
+    options.AddPolicy("AllowAll", policy =>
     {
-        var builder = WebApplication.CreateBuilder(args);
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 
-        builder.Logging.ClearProviders();
-        builder.Logging.AddConsole();
-        builder.Logging.SetMinimumLevel(LogLevel.Information);
+// Register CQRS Dispatcher and Handlers
+builder.Services.AddCqrs();
 
-        // Add DB Context
-        builder.Services.AddDbContext<HomebitesDbContext>(options =>
-            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
-        // Enable CORS for frontend
-        builder.Services.AddCors(options =>
-        {
-            options.AddPolicy("AllowAll", policy =>
-            {
-                policy.AllowAnyOrigin()
-                      .AllowAnyMethod()
-                      .AllowAnyHeader();
-            });
-        });
+var app = builder.Build();
 
-        builder.Services.AddControllers();
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
-
-        var app = builder.Build();
-
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseSwagger();
-            app.UseSwaggerUI();
-        }
-
-        app.UseCors("AllowAll");
-
-        // Note: Avoid enforcing HTTPS redirection locally so simple HTTP fetch from local HTML works cleanly
-        // app.UseHttpsRedirection();
-
-        app.UseAuthorization();
-        app.MapControllers();
-
-        app.Run();
-    }
-
-    private string GetDebuggerDisplay()
-    {
-        return ToString();
-    }
-
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<HomebitesDbContext>();
+    DbInitializer.Initialize(dbContext);
 }
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseCors("AllowAll");
+
+app.UseAuthorization();
+app.MapControllers();
+
+app.Run();

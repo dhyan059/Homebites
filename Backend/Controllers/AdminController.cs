@@ -1,9 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Homebites.Data;
-using Homebites.Models;
-using System.Security.Cryptography;
-using System.Text;
+﻿using Microsoft.AspNetCore.Mvc;
+using Homebites.CQRS.Common;
+using Homebites.CQRS.Command;
+using Homebites.CQRS.Query;
 
 namespace Homebites.Controllers
 {
@@ -11,15 +9,11 @@ namespace Homebites.Controllers
     [Route("api/admin")]
     public class AdminController : ControllerBase
     {
-        private readonly HomebitesDbContext _context;
+        private readonly IDispatcher _dispatcher;
 
-        public AdminController(HomebitesDbContext context) { _context = context; }
-
-        private static string HashPassword(string password)
+        public AdminController(IDispatcher dispatcher)
         {
-            using var sha256 = SHA256.Create();
-            byte[] bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password + "_homebites_salt"));
-            return Convert.ToBase64String(bytes);
+            _dispatcher = dispatcher;
         }
 
         // POST api/admin/login
@@ -37,133 +31,128 @@ namespace Homebites.Controllers
             return Unauthorized(new { success = false, message = "Invalid admin credentials." });
         }
 
-        // GET api/admin/stats
+        // GET api/admin/stats (Query)
         [HttpGet("stats")]
         public async Task<IActionResult> GetStats()
         {
-            var totalUsers   = await _context.Users.CountAsync(u => u.Role == "Customer");
-            var totalOrders  = await _context.Orders.CountAsync();
-            var totalRevenue = await _context.Orders.SumAsync(o => (decimal?)o.TotalAmount) ?? 0;
-            var pendingOrders = await _context.Orders.CountAsync(o =>
-                o.OrderStatus == "Accepted" || o.OrderStatus == "Preparing");
-
-            return Ok(new { success = true, data = new {
-                totalUsers, totalOrders,
-                totalRevenue = Math.Round(totalRevenue, 2),
-                pendingOrders
-            }});
+            var stats = await _dispatcher.QueryAsync(new GetAdminStatsQuery());
+            return Ok(new { success = true, data = stats });
         }
 
-        // GET api/admin/orders
+        // GET api/admin/orders (Query)
         [HttpGet("orders")]
         public async Task<IActionResult> GetAllOrders()
         {
-            var orders = await _context.Orders
-                .OrderByDescending(o => o.CreatedAt)
-                .Select(o => new {
-                    o.Id, o.OrderNumber, o.OrderDate,
-                    o.SubTotal, o.DeliveryCharge, o.TaxAmount, o.TotalAmount,
-                    o.OrderStatus, o.PaymentStatus, o.PaymentMethod,
-                    o.CustomerNotes, o.CancellationReason,
-                    o.EstimatedTime, o.CreatedAt,
-                    o.UserId,
-                    UserName = _context.Users.Where(u => u.Id == o.UserId).Select(u => u.FullName).FirstOrDefault(),
-                    UserEmail = _context.Users.Where(u => u.Id == o.UserId).Select(u => u.Email).FirstOrDefault(),
-                    UserMobile = _context.Users.Where(u => u.Id == o.UserId).Select(u => u.Mobile).FirstOrDefault(),
-                    Items = _context.OrderItems.Where(oi => oi.OrderId == o.Id)
-                        .Select(oi => new { oi.MealName, oi.Quantity, oi.ItemTotal, oi.IsVeg }).ToList()
-                })
-                .ToListAsync();
-
+            var orders = await _dispatcher.QueryAsync(new GetAllOrdersAdminQuery());
             return Ok(new { success = true, data = orders });
         }
 
-        // PUT api/admin/orders/{id}/status
+        // PUT api/admin/orders/{id}/status (Command)
         [HttpPut("orders/{id}/status")]
         public async Task<IActionResult> UpdateOrderStatus(long id, [FromBody] OrderStatusDto dto)
         {
-            var order = await _context.Orders.FindAsync(id);
-            if (order == null) return NotFound(new { success = false, message = "Order not found." });
+            var result = await _dispatcher.SendAsync(new UpdateOrderStatusCommand(id, dto.Status));
+            if (!result.Success)
+                return BadRequest(new { success = false, message = result.Message });
 
-            if (dto.Status == "Cancelled" && order.OrderStatus == "Delivered")
-                return BadRequest(new { success = false, message = "A successfully delivered order cannot be cancelled." });
-
-            var validStatuses = new[] { "Accepted", "Preparing", "Ready", "PickedUp", "Delivered", "Cancelled", "Refund Requested", "Refunded" };
-            if (!validStatuses.Contains(dto.Status))
-                return BadRequest(new { success = false, message = "Invalid status value." });
-
-            order.OrderStatus = dto.Status;
-            order.UpdatedAt = DateTime.UtcNow;
-            if (dto.Status == "Delivered") order.CompletedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
-
-            return Ok(new { success = true, message = $"Order {order.OrderNumber} updated to {dto.Status}." });
+            return Ok(new { success = true, message = result.Message });
         }
 
-        // POST api/admin/orders/{id}/refund
+        // POST api/admin/orders/{id}/refund (Command)
         [HttpPost("orders/{id}/refund")]
         public async Task<IActionResult> ApproveRefund(long id, [FromBody] RefundDto dto)
         {
-            var order = await _context.Orders.FindAsync(id);
-            if (order == null) return NotFound(new { success = false, message = "Order not found." });
+            var result = await _dispatcher.SendAsync(new ApproveRefundCommand(id, dto.Reason));
+            if (!result.Success)
+                return BadRequest(new { success = false, message = result.Message });
 
-            if (order.OrderStatus != "Refund Requested")
-                return BadRequest(new { success = false, message = "Only a pending refund request can be approved." });
-
-            order.OrderStatus = "Refunded";
-            order.PaymentStatus = "Refunded";
-            order.CancellationReason = dto.Reason ?? "Refund approved by admin";
-            order.UpdatedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
-
-            return Ok(new { success = true, message = $"Refund approved for order {order.OrderNumber}." });
+            return Ok(new { success = true, message = result.Message });
         }
 
-        // POST api/admin/orders/{id}/reject-refund
+        // POST api/admin/orders/{id}/reject-refund (Command)
         [HttpPost("orders/{id}/reject-refund")]
         public async Task<IActionResult> RejectRefund(long id, [FromBody] RefundDto dto)
         {
-            var order = await _context.Orders.FindAsync(id);
-            if (order == null) return NotFound(new { success = false, message = "Order not found." });
+            var result = await _dispatcher.SendAsync(new RejectRefundCommand(id, dto.Reason));
+            if (!result.Success)
+                return BadRequest(new { success = false, message = result.Message });
 
-            order.OrderStatus = "Delivered";
-            order.CancellationReason = dto.Reason ?? "Refund request declined by Admin";
-            order.UpdatedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
-
-            return Ok(new { success = true, message = $"Refund request for order {order.OrderNumber} was declined." });
+            return Ok(new { success = true, message = result.Message });
         }
 
-        // GET api/admin/users
+        // GET api/admin/users (Query)
         [HttpGet("users")]
         public async Task<IActionResult> GetAllUsers()
         {
-            var users = await _context.Users
-                .OrderByDescending(u => u.CreatedAt)
-                .Select(u => new {
-                    u.Id, u.FullName, u.Email, u.Mobile, u.Role,
-                    u.IsActive, u.IsEmailVerified, u.IsMobileVerified,
-                    u.LastLoginAt, u.CreatedAt,
-                    OrderCount = _context.Orders.Count(o => o.UserId == u.Id)
-                }).ToListAsync();
-
+            var users = await _dispatcher.QueryAsync(new GetAllUsersQuery());
             return Ok(new { success = true, data = users });
         }
 
-        // PUT api/admin/users/{id}/toggle
+        // PUT api/admin/users/{id}/toggle (Command)
         [HttpPut("users/{id}/toggle")]
         public async Task<IActionResult> ToggleUserStatus(int id)
         {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null) return NotFound(new { success = false, message = "User not found." });
-            user.IsActive = !user.IsActive;
-            user.UpdatedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
-            return Ok(new { success = true, isActive = user.IsActive });
+            var result = await _dispatcher.SendAsync(new ToggleUserStatusCommand(id));
+            if (!result.Success)
+                return NotFound(new { success = false, message = "User not found." });
+
+            return Ok(new { success = true, isActive = result.IsActive });
+        }
+
+        // GET api/admin/coupons (Query)
+        [HttpGet("coupons")]
+        public async Task<IActionResult> GetAllCoupons()
+        {
+            var coupons = await _dispatcher.QueryAsync(new GetAllCouponsQuery());
+            return Ok(new { success = true, data = coupons });
+        }
+
+        // POST api/admin/coupons (Command)
+        [HttpPost("coupons")]
+        public async Task<IActionResult> CreateCoupon([FromBody] CreateCouponDto dto)
+        {
+            var result = await _dispatcher.SendAsync(new CreateCouponCommand(
+                dto.Code, dto.DiscountType ?? "Percent", dto.DiscountValue, dto.MinOrderAmount, dto.MaxDiscount, dto.CreatedBy ?? "Admin"));
+
+            if (!result.Success)
+                return BadRequest(new { success = false, message = result.Message });
+
+            return Ok(new { success = true, message = result.Message });
+        }
+
+        // PUT api/admin/coupons/{id}/toggle (Command)
+        [HttpPut("coupons/{id}/toggle")]
+        public async Task<IActionResult> ToggleCoupon(int id)
+        {
+            var result = await _dispatcher.SendAsync(new ToggleCouponCommand(id, "Admin"));
+            if (!result.Success)
+                return NotFound(new { success = false, message = result.Message });
+
+            return Ok(new { success = true, message = result.Message });
+        }
+
+        // DELETE api/admin/coupons/{id} (Command)
+        [HttpDelete("coupons/{id}")]
+        public async Task<IActionResult> DeleteCoupon(int id)
+        {
+            var result = await _dispatcher.SendAsync(new DeleteCouponCommand(id));
+            if (!result.Success)
+                return NotFound(new { success = false, message = result.Message });
+
+            return Ok(new { success = true, message = result.Message });
         }
     }
 
     public class AdminLoginDto    { public string? Email { get; set; } public string? Password { get; set; } }
     public class OrderStatusDto   { public string Status { get; set; } = ""; }
     public class RefundDto        { public string? Reason { get; set; } }
+    public class CreateCouponDto
+    {
+        public string Code { get; set; } = "";
+        public string? DiscountType { get; set; }
+        public decimal DiscountValue { get; set; }
+        public decimal MinOrderAmount { get; set; }
+        public decimal? MaxDiscount { get; set; }
+        public string? CreatedBy { get; set; }
+    }
 }

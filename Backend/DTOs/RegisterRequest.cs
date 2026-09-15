@@ -79,22 +79,4 @@ namespace Homebites.DTOs
 
         public bool IsDefault { get; set; } = false;
     }
-
-    public class OrderRequest
-    {
-        public int UserId { get; set; }
-        public int AddressId { get; set; }
-
-        public string PaymentMethod { get; set; } = "UPI"; // CashOnDelivery | UPI | Card
-        public string? CustomerNotes { get; set; }
-
-        [Required]
-        public List<OrderItemDto> Items { get; set; } = new();
-    }
-
-    public class OrderItemDto
-    {
-        public int MealId { get; set; }
-        public int Quantity { get; set; }
-    }
 }

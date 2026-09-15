@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Homebites.Data;
-using Homebites.Models;
+using Homebites.CQRS.Common;
+using Homebites.CQRS.Command;
+using Homebites.CQRS.Query;
+using Homebites.DTOs;
 
 namespace Homebites.Controllers
 {
@@ -9,97 +10,49 @@ namespace Homebites.Controllers
     [Route("api/[controller]")]
     public class MenuController : ControllerBase
     {
-        private readonly HomebitesDbContext _context;
+        private readonly IDispatcher _dispatcher;
 
-        public MenuController(HomebitesDbContext context)
+        public MenuController(IDispatcher dispatcher)
         {
-            _context = context;
+            _dispatcher = dispatcher;
         }
 
-        // GET: api/menu
+        // GET: api/menu (Query)
         [HttpGet]
-        public async Task<IActionResult> GetMenu()
+        public async Task<IActionResult> GetMenu([FromQuery] int? categoryId, [FromQuery] bool? vegOnly)
         {
-            var meals = await _context.Meals
-                .Where(m => m.IsAvailable)
-                .OrderBy(m => m.CategoryId)
-                .ThenBy(m => m.MealName)
-                .Select(m => new
-                {
-                    m.Id,
-                    m.CategoryId,
-                    m.MealName,
-                    m.Description,
-                    m.Price,
-                    m.DiscountPrice,
-                    m.ImageUrl,
-                    m.IsVeg,
-                    m.PreparationMinutes
-                })
-                .ToListAsync();
-
+            var meals = await _dispatcher.QueryAsync(new GetMenuQuery(categoryId, vegOnly));
             return Ok(new { success = true, TotalMeals = meals.Count, count = meals.Count, data = meals });
         }
 
-        // GET: api/menu/all (Includes inactive for admin)
+        // GET: api/menu/all (Query)
         [HttpGet("all")]
         public async Task<IActionResult> GetAllMealsForAdmin()
         {
-            var meals = await _context.Meals
-                .OrderBy(m => m.CategoryId)
-                .ThenBy(m => m.MealName)
-                .Select(m => new
-                {
-                    m.Id,
-                    m.CategoryId,
-                    m.MealName,
-                    m.Description,
-                    m.Price,
-                    m.DiscountPrice,
-                    m.ImageUrl,
-                    m.IsVeg,
-                    m.IsAvailable,
-                    m.PreparationMinutes
-                })
-                .ToListAsync();
-
+            var meals = await _dispatcher.QueryAsync(new GetAllMealsAdminQuery());
             return Ok(new { success = true, count = meals.Count, data = meals });
         }
 
-        // PUT: api/menu/{id}/toggle
+        // PUT: api/menu/{id}/toggle (Command)
         [HttpPut("{id}/toggle")]
         public async Task<IActionResult> ToggleAvailability(int id)
         {
-            var meal = await _context.Meals.FindAsync(id);
-            if (meal == null) return NotFound(new { success = false, message = "Meal not found." });
+            var result = await _dispatcher.SendAsync(new ToggleMealAvailabilityCommand(id));
+            if (!result.Success)
+                return NotFound(new { success = false, message = result.Message });
 
-            meal.IsAvailable = !meal.IsAvailable;
-            meal.UpdatedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
-
-            return Ok(new { success = true, isAvailable = meal.IsAvailable, message = $"Item '{meal.MealName}' is now {(meal.IsAvailable ? "Available" : "Unavailable")}." });
+            return Ok(new { success = true, message = result.Message });
         }
 
-        // DELETE: api/menu/{id}
+        // DELETE: api/menu/{id} (Command)
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMeal(int id)
         {
-            var meal = await _context.Meals.FindAsync(id);
-            if (meal == null) return NotFound(new { success = false, message = "Meal not found." });
+            var result = await _dispatcher.SendAsync(new DeleteMealCommand(id));
+            if (!result.Success)
+                return NotFound(new { success = false, message = result.Message });
 
-            // Check if order items refer to this meal; if so, soft delete
-            bool hasOrders = await _context.OrderItems.AnyAsync(oi => oi.MealId == id);
-            if (hasOrders)
-            {
-                meal.IsAvailable = false;
-                meal.UpdatedAt = DateTime.UtcNow;
-                await _context.SaveChangesAsync();
-                return Ok(new { success = true, message = $"Meal '{meal.MealName}' has existing order history, so it was set to Unavailable." });
-            }
-
-            _context.Meals.Remove(meal);
-            await _context.SaveChangesAsync();
-            return Ok(new { success = true, message = $"Meal '{meal.MealName}' removed completely from menu." });
+            return Ok(new { success = true, message = result.Message });
         }
     }
 }
